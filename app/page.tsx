@@ -3,10 +3,22 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './page.module.css';
 
+const textMessages = [
+  "danger testing",
+  "screenshot moment",
+  "this is not an app",
+  "you are not a rapper",
+  "shipper/winner pronouns",
+  "this is your life",
+  "you just came back from japan",
+  "shipper energy"
+];
+
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>('');
+  const [currentTextIndex, setCurrentTextIndex] = useState<number>(0);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -39,10 +51,20 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const textInterval = setInterval(() => {
+      setCurrentTextIndex((prevIndex) => 
+        (prevIndex + 1) % textMessages.length
+      );
+    }, 3000);
+
+    return () => clearInterval(textInterval);
+  }, []);
+
   return (
     <div className={styles.container}>
       <div className={styles.overlayText}>
-        danger testing
+        {textMessages[currentTextIndex]}
       </div>
       {error ? (
         <div className={styles.error}>
