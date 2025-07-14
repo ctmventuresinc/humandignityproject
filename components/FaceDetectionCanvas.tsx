@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useFaceDetection } from '../hooks/useFaceDetection';
-import { DefaultBoundingBox, MoggedBoundingBox } from './BoundingBox';
+import { DefaultBoundingBox, MoggedBoundingBox, MoggingBoundingBox } from './BoundingBox';
 import { BoundingBoxStyle } from '../types/face-detection';
 
 interface FaceDetectionCanvasProps {
@@ -40,6 +40,8 @@ export const FaceDetectionCanvas = ({ videoRef, canvasRef, style }: FaceDetectio
         // Render based on style
         if (style === 'mogged') {
           MoggedBoundingBox(boundingBoxProps);
+        } else if (style === 'mogging') {
+          MoggingBoundingBox(boundingBoxProps);
         } else {
           DefaultBoundingBox(boundingBoxProps);
         }
