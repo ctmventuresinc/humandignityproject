@@ -22,6 +22,9 @@ export default function Home() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>('');
   const [currentTextIndex, setCurrentTextIndex] = useState<number>(0);
+  
+  // Bounding box style selector
+  const boundingBoxStyle = 'mogged'; // 'mogged' or 'default'
 
   useEffect(() => {
     const startCamera = async () => {
@@ -106,14 +109,41 @@ export default function Home() {
             const scaleX = canvas.width / video.videoWidth;
             const scaleY = canvas.height / video.videoHeight;
             
-            ctx.strokeStyle = '#00FF00';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(
-              box.x * scaleX,
-              box.y * scaleY,
-              box.width * scaleX,
-              box.height * scaleY
-            );
+            const scaledX = box.x * scaleX;
+            const scaledY = box.y * scaleY;
+            const scaledWidth = box.width * scaleX;
+            const scaledHeight = box.height * scaleY;
+            
+            if (boundingBoxStyle === 'mogged') {
+              // Red bounding box
+              ctx.strokeStyle = '#FF0000';
+              ctx.lineWidth = 3;
+              ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+              
+              // Draw "MOGGED" label underneath red box
+              const labelX = scaledX;
+              const labelY = scaledY + scaledHeight + 20;
+              const labelWidth = scaledWidth; // Match bounding box width
+              const labelHeight = 80; // Much larger height
+              
+              // Draw rounded red background
+              ctx.fillStyle = '#FF0000';
+              ctx.beginPath();
+              ctx.roundRect(labelX, labelY, labelWidth, labelHeight, 16);
+              ctx.fill();
+              
+              // Draw white text - MUCH larger and all caps
+              ctx.fillStyle = '#FFFFFF';
+              ctx.font = 'bold 40px Arial'; // MUCH larger font
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('MOGGED', labelX + labelWidth/2, labelY + labelHeight/2);
+            } else {
+              // Default green bounding box
+              ctx.strokeStyle = '#00FF00';
+              ctx.lineWidth = 3;
+              ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+            }
           }
         } catch (error) {
           console.log('Detection error:', error);
