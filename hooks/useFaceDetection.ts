@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import * as faceapi from 'face-api.js';
 import { FaceDetection } from '../types/face-detection';
+import { BoundingBoxSmoother } from '../utils/smoothing';
 
 export const useFaceDetection = (
   video: HTMLVideoElement | null,
@@ -8,6 +9,7 @@ export const useFaceDetection = (
 ) => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [detections, setDetections] = useState<FaceDetection[]>([]);
+  const smootherRef = useRef<BoundingBoxSmoother>(new BoundingBoxSmoother(0.7, 3));
 
   useEffect(() => {
     if (!video || !canvas) return;
@@ -43,14 +45,19 @@ export const useFaceDetection = (
           new faceapi.TinyFaceDetectorOptions()
         );
 
-        const mappedDetections: FaceDetection[] = faceDetections.map((detection) => ({
-          box: {
+        const mappedDetections: FaceDetection[] = faceDetections.map((detection) => {
+          // Apply smoothing to reduce jitter
+          const smoothedBox = smootherRef.current.smooth({
             x: detection.box.x,
             y: detection.box.y,
             width: detection.box.width,
             height: detection.box.height,
-          },
-        }));
+          });
+
+          return {
+            box: smoothedBox,
+          };
+        });
 
         setDetections(mappedDetections);
       } catch (error) {
@@ -71,6 +78,8 @@ export const useFaceDetection = (
         cancelAnimationFrame(animationId);
       }
       video.removeEventListener('loadeddata', detectFaces);
+      // Reset smoother when component unmounts
+      smootherRef.current.reset();
     };
   }, [isModelLoaded, video, canvas]);
 
