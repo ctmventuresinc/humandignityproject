@@ -41,6 +41,9 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
+      <div className={styles.overlayText}>
+        danger testing
+      </div>
       {error ? (
         <div className={styles.error}>
           <p className={styles.errorTitle}>{error}</p>

@@ -13,6 +13,24 @@
   padding: 0;
 }
 
+.overlayText {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Helvetica', Arial, sans-serif;
+  font-weight: bold;
+  color: #FFFF00;
+  font-size: 8rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: -2.5%;
+  z-index: 1000;
+  pointer-events: none;
+  width: 100vw;
+  line-height: 0.9;
+}
+
 .videoContainer {
   width: 80vw;
   height: 80vw;
@@ -65,6 +83,10 @@
   
   .errorSubtitle {
     font-size: 0.8rem;
+  }
+  
+  .overlayText {
+    font-size: 4rem;
   }
 }
 
