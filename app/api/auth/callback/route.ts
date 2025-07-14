@@ -5,18 +5,9 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code  = searchParams.get('code');
   const state = searchParams.get('state');
-  const error = searchParams.get('error');
-
-  console.log('Callback received:', { code: !!code, state, error });
-
-  if (error) {
-    console.error('OAuth error:', error);
-    return NextResponse.json({ error: `OAuth error: ${error}` }, { status: 400 });
-  }
 
   const store = await cookies();
   if (state !== store.get('state')?.value) {
-    console.error('State mismatch:', { received: state, stored: store.get('state')?.value });
     return NextResponse.json({ error: 'Bad state' }, { status: 400 });
   }
 
