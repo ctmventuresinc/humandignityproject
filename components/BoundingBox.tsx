@@ -82,3 +82,32 @@ export const MoggingBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   ctx.textBaseline = 'middle';
   ctx.fillText('MOGGING', labelX + labelWidth/2, labelY + labelHeight/2);
 };
+
+export const GreenScreenBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
+  const scaleX = canvasWidth / videoWidth;
+  const scaleY = canvasHeight / videoHeight;
+  
+  const scaledX = detection.box.x * scaleX;
+  const scaledY = detection.box.y * scaleY;
+  const scaledWidth = detection.box.width * scaleX;
+  const scaledHeight = detection.box.height * scaleY;
+  
+  // Fill entire canvas with chroma key green
+  ctx.fillStyle = '#00FF00';
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+  
+  // Create a circular mask around the face (more natural than rectangle)
+  const centerX = scaledX + scaledWidth / 2;
+  const centerY = scaledY + scaledHeight / 2;
+  const radius = Math.max(scaledWidth, scaledHeight) / 2 + 20; // Add some padding
+  
+  // Use composite operation to "cut out" the face area
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  // Reset composite operation
+  ctx.globalCompositeOperation = 'source-over';
+};
