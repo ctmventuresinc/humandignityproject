@@ -16,4 +16,4 @@ export interface BoundingBoxProps {
   ctx: CanvasRenderingContext2D;
 }
 
-export type BoundingBoxStyle = 'default' | 'mogged' | 'mogging' | 'greenscreen';
+export type BoundingBoxStyle = 'default' | 'mogged' | 'mogging' | 'spotlight';

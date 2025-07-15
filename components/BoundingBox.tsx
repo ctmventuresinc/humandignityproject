@@ -83,7 +83,7 @@ export const MoggingBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   ctx.fillText('MOGGING', labelX + labelWidth/2, labelY + labelHeight/2);
 };
 
-export const GreenScreenBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
+export const SpotlightBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
   const scaleX = canvasWidth / videoWidth;
   const scaleY = canvasHeight / videoHeight;
   
@@ -92,16 +92,16 @@ export const GreenScreenBoundingBox = ({ detection, canvasWidth, canvasHeight, v
   const scaledWidth = detection.box.width * scaleX;
   const scaledHeight = detection.box.height * scaleY;
   
-  // Fill entire canvas with chroma key green
+  // Fill entire canvas with green overlay
   ctx.fillStyle = '#00FF00';
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   
-  // Create a circular mask around the face (more natural than rectangle)
+  // Create a circular spotlight around the face (more natural than rectangle)
   const centerX = scaledX + scaledWidth / 2;
   const centerY = scaledY + scaledHeight / 2;
   const radius = Math.max(scaledWidth, scaledHeight) / 2 + 20; // Add some padding
   
-  // Use composite operation to "cut out" the face area
+  // Use composite operation to "cut out" the face area for spotlight effect
   ctx.globalCompositeOperation = 'destination-out';
   ctx.fillStyle = '#000000';
   ctx.beginPath();

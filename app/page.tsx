@@ -25,7 +25,7 @@ export default function Home() {
   const [currentTextIndex, setCurrentTextIndex] = useState<number>(0);
   
   // Bounding box style selector
-  const boundingBoxStyle: BoundingBoxStyle = 'greenscreen'; // 'default', 'mogged', 'mogging', or 'greenscreen'
+  const boundingBoxStyle: BoundingBoxStyle = 'mogging'; // 'default', 'mogged', 'mogging', or 'spotlight'
 
   useEffect(() => {
     const startCamera = async () => {
