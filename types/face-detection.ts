@@ -17,3 +17,5 @@ export interface BoundingBoxProps {
 }
 
 export type BoundingBoxStyle = 'default' | 'mogged' | 'mogging' | 'spotlight';
+
+export type DetectionMode = 'solo' | 'duo';

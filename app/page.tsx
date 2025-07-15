@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './page.module.css';
 import { FaceDetectionCanvas } from '../components/FaceDetectionCanvas';
-import { BoundingBoxStyle } from '../types/face-detection';
+import { BoundingBoxStyle, DetectionMode } from '../types/face-detection';
 
 const textMessages = [
   "danger testing",
@@ -26,6 +26,9 @@ export default function Home() {
   
   // Bounding box style selector
   const boundingBoxStyle: BoundingBoxStyle = 'mogging'; // 'default', 'mogged', 'mogging', or 'spotlight'
+  
+  // Detection mode selector
+  const detectionMode: DetectionMode = 'duo'; // 'solo' or 'duo'
 
   useEffect(() => {
     const startCamera = async () => {
@@ -101,6 +104,7 @@ export default function Home() {
             videoRef={videoRef}
             canvasRef={canvasRef}
             style={boundingBoxStyle}
+            mode={detectionMode}
           />
         </div>
       )}
