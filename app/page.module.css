@@ -17,18 +17,19 @@
   position: absolute;
   top: 30%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Helvetica', Arial, sans-serif;
+  transform: translate(-50%, -50%) scale(var(--overlay-scale, 1));
+  transform-origin: center top;
+  font-family: "Helvetica", Arial, sans-serif;
   font-weight: bold;
-  color: #FFFF00;
+  color: #ffff00;
   font-size: 8rem;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: -2.5%;
   z-index: 1000;
   pointer-events: none;
-  width: 100vw;
-  line-height: 0.9;
+  line-height: 0.95;
+  white-space: nowrap;
 }
 
 .videoContainer {
@@ -82,19 +83,19 @@
     width: 90vw;
     height: 90vw;
   }
-  
+
   .error {
     padding: 1.5rem;
   }
-  
+
   .errorTitle {
     font-size: 1.1rem;
   }
-  
+
   .errorSubtitle {
     font-size: 0.8rem;
   }
-  
+
   .overlayText {
     font-size: 4rem;
   }
