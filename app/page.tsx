@@ -5,11 +5,11 @@ import styles from "./page.module.css";
 import { FaceDetectionCanvas } from "../components/FaceDetectionCanvas";
 import { BoundingBoxStyle, DetectionMode } from "../types/face-detection";
 
-const textMessages = ["mogcam.com", "mogmirror.com"];
+const textMessages = ["mogcam.com"];
 
 export default function Home() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
   const [currentTextIndex, setCurrentTextIndex] = useState<number>(0);
@@ -112,8 +112,8 @@ export default function Home() {
             height={1280}
           />
           <FaceDetectionCanvas
-            videoRef={videoRef as React.RefObject<HTMLVideoElement>}
-            canvasRef={canvasRef as React.RefObject<HTMLCanvasElement>}
+            videoRef={videoRef}
+            canvasRef={canvasRef}
             style={boundingBoxStyle}
             mode={detectionMode}
           />

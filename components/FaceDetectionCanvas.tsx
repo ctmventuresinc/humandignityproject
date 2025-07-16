@@ -1,16 +1,26 @@
-import { useEffect } from 'react';
-import { useFaceDetection } from '../hooks/useFaceDetection';
-import { DefaultBoundingBox, MoggedBoundingBox, MoggingBoundingBox, SpotlightBoundingBox } from './BoundingBox';
-import { BoundingBoxStyle, DetectionMode } from '../types/face-detection';
+import { useEffect } from "react";
+import { useFaceDetection } from "../hooks/useFaceDetection";
+import {
+  DefaultBoundingBox,
+  MoggedBoundingBox,
+  MoggingBoundingBox,
+  SpotlightBoundingBox,
+} from "./BoundingBox";
+import { BoundingBoxStyle, DetectionMode } from "../types/face-detection";
 
 interface FaceDetectionCanvasProps {
-  videoRef: React.RefObject<HTMLVideoElement>;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
   style: BoundingBoxStyle;
   mode: DetectionMode;
 }
 
-export const FaceDetectionCanvas = ({ videoRef, canvasRef, style, mode }: FaceDetectionCanvasProps) => {
+export const FaceDetectionCanvas = ({
+  videoRef,
+  canvasRef,
+  style,
+  mode,
+}: FaceDetectionCanvasProps) => {
   const { detections } = useFaceDetection(videoRef.current, canvasRef.current);
 
   useEffect(() => {
@@ -18,7 +28,7 @@ export const FaceDetectionCanvas = ({ videoRef, canvasRef, style, mode }: FaceDe
 
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
 
     if (!ctx) return;
 
@@ -28,8 +38,9 @@ export const FaceDetectionCanvas = ({ videoRef, canvasRef, style, mode }: FaceDe
 
       if (detections.length > 0) {
         // Determine how many faces to process based on mode
-        const facesToProcess = mode === 'solo' ? 1 : Math.min(detections.length, 2);
-        
+        const facesToProcess =
+          mode === "solo" ? 1 : Math.min(detections.length, 2);
+
         for (let i = 0; i < facesToProcess; i++) {
           const detection = detections[i];
 
@@ -43,7 +54,7 @@ export const FaceDetectionCanvas = ({ videoRef, canvasRef, style, mode }: FaceDe
           };
 
           // Render based on style and face index
-          if (mode === 'duo') {
+          if (mode === "duo") {
             // Face 1 = mogging, Face 2 = mogged for testing
             if (i === 0) {
               MoggingBoundingBox(boundingBoxProps);
@@ -52,11 +63,11 @@ export const FaceDetectionCanvas = ({ videoRef, canvasRef, style, mode }: FaceDe
             }
           } else {
             // Solo mode - use selected style
-            if (style === 'mogged') {
+            if (style === "mogged") {
               MoggedBoundingBox(boundingBoxProps);
-            } else if (style === 'mogging') {
+            } else if (style === "mogging") {
               MoggingBoundingBox(boundingBoxProps);
-            } else if (style === 'spotlight') {
+            } else if (style === "spotlight") {
               SpotlightBoundingBox(boundingBoxProps);
             } else {
               DefaultBoundingBox(boundingBoxProps);
