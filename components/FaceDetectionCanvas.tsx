@@ -5,6 +5,7 @@ import {
   MoggedBoundingBox,
   MoggingBoundingBox,
   SpotlightBoundingBox,
+  WaitingBoundingBox,
 } from "./BoundingBox";
 import { BoundingBoxStyle, DetectionMode } from "../types/face-detection";
 
@@ -45,37 +46,16 @@ export const FaceDetectionCanvas = ({
         if (mode === "duo" && detections.length === 1) {
           const detection = detections[0];
           
-          // Calculate face box position (same as MoggingBoundingBox)
-          const scaleX = canvas.width / video.videoWidth;
-          const scaleY = canvas.height / video.videoHeight;
-          const scaledX = detection.box.x * scaleX;
-          const scaledY = detection.box.y * scaleY;
-          const scaledWidth = detection.box.width * scaleX;
-          const scaledHeight = detection.box.height * scaleY;
+          const boundingBoxProps = {
+            detection,
+            canvasWidth: canvas.width,
+            canvasHeight: canvas.height,
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            ctx,
+          };
           
-          // Gray bounding box
-          ctx.strokeStyle = '#808080';
-          ctx.lineWidth = 3;
-          ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
-          
-          // Draw "waiting for player 2..." label underneath gray box
-          const labelX = scaledX;
-          const labelY = scaledY + scaledHeight + 20;
-          const labelWidth = scaledWidth; // Match bounding box width
-          const labelHeight = 80; // Much larger height
-          
-          // Draw rounded gray background
-          ctx.fillStyle = '#808080';
-          ctx.beginPath();
-          ctx.roundRect(labelX, labelY, labelWidth, labelHeight, 16);
-          ctx.fill();
-          
-          // Draw white text - MUCH larger and all caps
-          ctx.fillStyle = '#FFFFFF';
-          ctx.font = 'bold 40px Arial'; // MUCH larger font
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('WAITING FOR PLAYER 2...', labelX + labelWidth/2, labelY + labelHeight/2);
+          WaitingBoundingBox(boundingBoxProps);
         } else {
           // Normal processing for other cases
           for (let i = 0; i < facesToProcess; i++) {
