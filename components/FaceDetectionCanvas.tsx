@@ -23,6 +23,16 @@ export const FaceDetectionCanvas = ({
   mode,
 }: FaceDetectionCanvasProps) => {
   const { detections } = useFaceDetection(videoRef.current, canvasRef.current);
+  
+  // Calculate smile status for parent component
+  const smilingFaces = detections.filter(detection => detection.isSmiling);
+  const smileStatus = detections.length > 0 ? (smilingFaces.length > 0 ? 'smiling' : 'not_smiling') : 'no_faces';
+  
+  // Pass smile status to parent via a custom event or callback
+  useEffect(() => {
+    const event = new CustomEvent('smileStatusChange', { detail: smileStatus });
+    window.dispatchEvent(event);
+  }, [smileStatus]);
 
   useEffect(() => {
     if (!canvasRef.current || !videoRef.current) return;
@@ -93,6 +103,7 @@ export const FaceDetectionCanvas = ({
           }
         }
       }
+
 
       requestAnimationFrame(draw);
     };

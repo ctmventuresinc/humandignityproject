@@ -5,6 +5,7 @@ export interface FaceDetection {
     width: number;
     height: number;
   };
+  isSmiling?: boolean;
 }
 
 export interface BoundingBoxProps {

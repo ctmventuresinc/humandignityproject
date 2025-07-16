@@ -13,13 +13,15 @@ export default function Home() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
   const [currentTextIndex, setCurrentTextIndex] = useState<number>(0);
+  const [smileStatus, setSmileStatus] = useState<string>('no_faces');
+  const [isDuoMode, setIsDuoMode] = useState<boolean>(true);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Bounding box style selector
   const boundingBoxStyle: BoundingBoxStyle = "mogging"; // 'default', 'mogged', 'mogging', or 'spotlight'
 
-  // Detection mode selector
-  const detectionMode: DetectionMode = "duo"; // 'solo' or 'duo'
+  // Detection mode based on toggle
+  const detectionMode: DetectionMode = isDuoMode ? "duo" : "solo";
 
   useEffect(() => {
     const startCamera = async () => {
@@ -60,6 +62,19 @@ export default function Home() {
     return () => clearInterval(textInterval);
   }, []);
 
+  // Listen for smile status changes
+  useEffect(() => {
+    const handleSmileStatusChange = (event: any) => {
+      setSmileStatus(event.detail);
+    };
+    
+    window.addEventListener('smileStatusChange', handleSmileStatusChange);
+    
+    return () => {
+      window.removeEventListener('smileStatusChange', handleSmileStatusChange);
+    };
+  }, []);
+
   // Dynamically scale overlay text to fill screen width (uniform scaling)
   useEffect(() => {
     const updateScale = () => {
@@ -82,6 +97,52 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
+      {/* Duo/Solo Mode Toggle */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        padding: '10px 15px',
+        borderRadius: '25px',
+        color: 'white',
+        fontSize: '16px',
+        fontWeight: 'bold'
+      }}>
+        <span>Duo Mode</span>
+        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={isDuoMode}
+            onChange={(e) => setIsDuoMode(e.target.checked)}
+            style={{ display: 'none' }}
+          />
+          <div style={{
+            width: '50px',
+            height: '25px',
+            backgroundColor: isDuoMode ? '#00FF00' : '#FF0000',
+            borderRadius: '25px',
+            position: 'relative',
+            transition: 'background-color 0.3s'
+          }}>
+            <div style={{
+              width: '21px',
+              height: '21px',
+              backgroundColor: 'white',
+              borderRadius: '50%',
+              position: 'absolute',
+              top: '2px',
+              left: isDuoMode ? '27px' : '2px',
+              transition: 'left 0.3s'
+            }} />
+          </div>
+        </label>
+      </div>
+      
       <div
         ref={overlayRef}
         className={styles.overlayText}
@@ -117,6 +178,37 @@ export default function Home() {
             style={boundingBoxStyle}
             mode={detectionMode}
           />
+        </div>
+      )}
+      
+      {/* Smile status at bottom of website */}
+      {smileStatus === 'smiling' && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: '#00FF00',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          zIndex: 1000
+        }}>
+          Smiling
+        </div>
+      )}
+      
+      {smileStatus === 'not_smiling' && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: '#FF0000',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          zIndex: 1000
+        }}>
+          Not smiling
         </div>
       )}
     </div>

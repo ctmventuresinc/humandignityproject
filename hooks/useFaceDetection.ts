@@ -10,6 +10,7 @@ export const useFaceDetection = (
 ) => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [detections, setDetections] = useState<FaceDetection[]>([]);
+  const [hasExpressionModel, setHasExpressionModel] = useState(false);
   const smoothersRef = useRef<BoundingBoxSmoother[]>([]);
   const faceTrackerRef = useRef<FaceTracker>(new FaceTracker());
 
@@ -22,6 +23,17 @@ export const useFaceDetection = (
         await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
         setIsModelLoaded(true);
         console.log('Face detection models loaded successfully');
+        
+        // Try to load expression models optionally
+        try {
+          await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+          await faceapi.nets.faceExpressionNet.loadFromUri('/models');
+          setHasExpressionModel(true);
+          console.log('Expression detection models loaded successfully');
+        } catch (expressionError) {
+          console.log('Expression models not available, using basic face detection only');
+          setHasExpressionModel(false);
+        }
       } catch (error) {
         console.log('Failed to load models:', error);
       }
@@ -42,20 +54,41 @@ export const useFaceDetection = (
       }
 
       try {
-        const faceDetections = await faceapi.detectAllFaces(
-          video,
-          new faceapi.TinyFaceDetectorOptions()
-        );
+        let faceDetections;
+        
+        if (hasExpressionModel) {
+          // Use expression detection if available
+          faceDetections = await faceapi.detectAllFaces(
+            video,
+            new faceapi.TinyFaceDetectorOptions()
+          ).withFaceLandmarks().withFaceExpressions();
+        } else {
+          // Use basic face detection only
+          faceDetections = await faceapi.detectAllFaces(
+            video,
+            new faceapi.TinyFaceDetectorOptions()
+          );
+        }
 
         // Convert to our format first
-        const rawDetections: FaceDetection[] = faceDetections.map((detection) => ({
-          box: {
-            x: detection.box.x,
-            y: detection.box.y,
-            width: detection.box.width,
-            height: detection.box.height,
-          },
-        }));
+        const rawDetections: FaceDetection[] = faceDetections.map((detection: any) => {
+          let isSmiling = false;
+          
+          // Check for expressions if available
+          if (hasExpressionModel && detection.expressions) {
+            isSmiling = detection.expressions.happy > 0.6;
+          }
+          
+          return {
+            box: {
+              x: hasExpressionModel ? detection.detection.box.x : detection.box.x,
+              y: hasExpressionModel ? detection.detection.box.y : detection.box.y,
+              width: hasExpressionModel ? detection.detection.box.width : detection.box.width,
+              height: hasExpressionModel ? detection.detection.box.height : detection.box.height,
+            },
+            isSmiling,
+          };
+        });
 
         // Use face tracker to maintain consistent IDs
         const trackedFaces = faceTrackerRef.current.updateFaces(rawDetections);
@@ -77,6 +110,7 @@ export const useFaceDetection = (
 
           return {
             box: smoothedBox,
+            isSmiling: trackedFace.detection.isSmiling,
           };
         });
 
@@ -88,8 +122,11 @@ export const useFaceDetection = (
           x: Math.round(tf.detection.box.x), 
           y: Math.round(tf.detection.box.y), 
           w: Math.round(tf.detection.box.width), 
-          h: Math.round(tf.detection.box.height) 
+          h: Math.round(tf.detection.box.height),
+          isSmiling: tf.detection.isSmiling
         })));
+        
+        console.log(`Expression model available: ${hasExpressionModel}`);
 
         setDetections(mappedDetections);
       } catch (error) {
