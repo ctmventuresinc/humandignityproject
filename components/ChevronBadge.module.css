@@ -4,7 +4,7 @@
 }
 
 .cyan {
-  filter: drop-shadow(0 0 2px #00e1ff) drop-shadow(0 0 4px #00e1ff);
+  filter: drop-shadow(0 0 8px rgba(0, 225, 255, 0.4)) drop-shadow(0 0 16px rgba(0, 225, 255, 0.3)) drop-shadow(0 0 24px rgba(0, 225, 255, 0.2));
 }
 
 .magenta {

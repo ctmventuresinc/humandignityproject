@@ -60,7 +60,8 @@ export const DefaultBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   const scaleX = canvasWidth / videoWidth;
   const scaleY = canvasHeight / videoHeight;
   
-  const scaledX = detection.box.x * scaleX;
+  // Flip X coordinate for mirror effect
+  const scaledX = canvasWidth - (detection.box.x * scaleX) - (detection.box.width * scaleX);
   const scaledY = detection.box.y * scaleY;
   const scaledWidth = detection.box.width * scaleX;
   const scaledHeight = detection.box.height * scaleY;
@@ -110,7 +111,8 @@ export const LabeledBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   const scaleX = canvasWidth / videoWidth;
   const scaleY = canvasHeight / videoHeight;
   
-  const scaledX = detection.box.x * scaleX;
+  // Flip X coordinate for mirror effect
+  const scaledX = canvasWidth - (detection.box.x * scaleX) - (detection.box.width * scaleX);
   const scaledY = detection.box.y * scaleY;
   const scaledWidth = detection.box.width * scaleX;
   const scaledHeight = detection.box.height * scaleY;
@@ -144,7 +146,8 @@ export const MoggedBoundingBox = ({ detection, canvasWidth, canvasHeight, videoW
   const scaleX = canvasWidth / videoWidth;
   const scaleY = canvasHeight / videoHeight;
   
-  const scaledX = detection.box.x * scaleX;
+  // Flip X coordinate for mirror effect
+  const scaledX = canvasWidth - (detection.box.x * scaleX) - (detection.box.width * scaleX);
   const scaledY = detection.box.y * scaleY;
   const scaledWidth = detection.box.width * scaleX;
   const scaledHeight = detection.box.height * scaleY;
@@ -194,7 +197,8 @@ export const MoggingBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   const scaleX = canvasWidth / videoWidth;
   const scaleY = canvasHeight / videoHeight;
   
-  const scaledX = detection.box.x * scaleX;
+  // Flip X coordinate for mirror effect
+  const scaledX = canvasWidth - (detection.box.x * scaleX) - (detection.box.width * scaleX);
   const scaledY = detection.box.y * scaleY;
   const scaledWidth = detection.box.width * scaleX;
   const scaledHeight = detection.box.height * scaleY;
@@ -244,7 +248,8 @@ export const WaitingBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   const scaleX = canvasWidth / videoWidth;
   const scaleY = canvasHeight / videoHeight;
   
-  const scaledX = detection.box.x * scaleX;
+  // Flip X coordinate for mirror effect
+  const scaledX = canvasWidth - (detection.box.x * scaleX) - (detection.box.width * scaleX);
   const scaledY = detection.box.y * scaleY;
   const scaledWidth = detection.box.width * scaleX;
   const scaledHeight = detection.box.height * scaleY;
@@ -281,7 +286,8 @@ export const SpotlightBoundingBox = ({ detection, canvasWidth, canvasHeight, vid
   const scaleX = canvasWidth / videoWidth;
   const scaleY = canvasHeight / videoHeight;
   
-  const scaledX = detection.box.x * scaleX;
+  // Flip X coordinate for mirror effect
+  const scaledX = canvasWidth - (detection.box.x * scaleX) - (detection.box.width * scaleX);
   const scaledY = detection.box.y * scaleY;
   const scaledWidth = detection.box.width * scaleX;
   const scaledHeight = detection.box.height * scaleY;

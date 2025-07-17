@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import { FaceDetectionCanvas } from "../components/FaceDetectionCanvas";
 import { BoundingBoxStyle, DetectionMode } from "../types/face-detection";
 import ChevronBadge from "../components/ChevronBadge";
+import ModeToggle from "../components/ModeToggle";
 
 const textMessages = ["mogcam.com"];
 
@@ -254,71 +255,8 @@ export default function Home() {
         </div>
       )}
       
-      {/* Singleplayer/Multiplayer Mode Toggle - Sticky bottom footer */}
-      <div style={{
-        position: 'fixed',
-        bottom: '0px',
-        left: '0px',
-        right: '0px',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '20px',
-        padding: '20px',
-        backgroundColor: 'transparent'
-      }}>
-        <span style={{
-          color: 'white',
-          fontSize: '18px',
-          fontWeight: 'bold',
-          textTransform: 'uppercase',
-          letterSpacing: '2px',
-          textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6)',
-          fontFamily: 'Arial, sans-serif'
-        }}>
-          Singleplayer
-        </span>
-        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            checked={isDuoMode}
-            onChange={(e) => setIsDuoMode(e.target.checked)}
-            style={{ display: 'none' }}
-          />
-          <div style={{
-            width: '50px',
-            height: '24px',
-            backgroundColor: isDuoMode ? '#00FFFF' : '#006666',
-            borderRadius: '25px',
-            position: 'relative',
-            transition: 'background-color 0.3s',
-            border: '2px solid #00FFFF'
-          }}>
-            <div style={{
-              width: '18px',
-              height: '18px',
-              backgroundColor: 'white',
-              borderRadius: '50%',
-              position: 'absolute',
-              top: '1px',
-              left: isDuoMode ? '28px' : '1px',
-              transition: 'left 0.3s'
-            }} />
-          </div>
-        </label>
-        <span style={{
-          color: 'white',
-          fontSize: '18px',
-          fontWeight: 'bold',
-          textTransform: 'uppercase',
-          letterSpacing: '2px',
-          textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6)',
-          fontFamily: 'Arial, sans-serif'
-        }}>
-          Multiplayer
-        </span>
-      </div>
+      {/* Mode Toggle Component */}
+      <ModeToggle isDuoMode={isDuoMode} onToggle={setIsDuoMode} />
       
       {/* Smile status at bottom of website */}
       {smileStatus === 'smiling' && (
