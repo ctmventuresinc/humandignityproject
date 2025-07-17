@@ -1,38 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import styles from "./MobileWarning.module.css";
 
 export default function MobileWarning() {
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  // Same dynamic scaling as mogcam.com text
-  useEffect(() => {
-    const updateScale = () => {
-      const overlay = overlayRef.current;
-      if (!overlay) return;
-      // Reset scale to 1 to measure natural width
-      overlay.style.setProperty("--overlay-scale", "1");
-      const parentWidth = window.innerWidth;
-      const textWidth = overlay.scrollWidth;
-      if (textWidth > 0) {
-        const scale = parentWidth / textWidth;
-        overlay.style.setProperty("--overlay-scale", scale.toString());
-      }
-    };
-
-    updateScale(); // Initial run
-    window.addEventListener("resize", updateScale);
-    return () => window.removeEventListener("resize", updateScale);
-  }, []);
-
   return (
     <div className={styles.container}>
-      <div
-        ref={overlayRef}
-        className={styles.warningText}
-      >
-        vision too big for your screen
+      <div className={styles.content}>
+        <div className={styles.warningText}>
+          <div className={styles.line}>VISION</div>
+          <div className={styles.line}>TOO BIG</div>
+          <div className={styles.line}>FOR YOUR</div>
+          <div className={styles.line}>SCREEN</div>
+        </div>
+        <div className={styles.subtitle}>
+          please visit on a desktop or tablet. thank you.
+        </div>
+        <div className={styles.dangerText}>
+          dangertesting.com
+        </div>
       </div>
     </div>
   );
