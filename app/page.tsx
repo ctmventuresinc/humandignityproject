@@ -424,12 +424,12 @@ export default function Home() {
 
           {/* Mogged overlay */}
           {showMoggedOverlay && (
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%) rotate(-15deg) scale(1.5)",
+          <div
+          style={{
+          position: "absolute",
+          top: "50%",
+          left: "calc(50% - 100px)",
+          transform: "translate(-50%, -50%) rotate(-15deg) scale(1.5)",
                 zIndex: 20,
                 pointerEvents: "none",
                 animation: "moggedFlash 1.2s ease-in-out forwards",
@@ -449,12 +449,12 @@ export default function Home() {
 
           {/* Mogging overlay */}
           {showMoggingOverlay && (
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%) rotate(-15deg) scale(1.5)",
+          <div
+          style={{
+          position: "absolute",
+          top: "50%",
+          left: "calc(50% - 100px)",
+          transform: "translate(-50%, -50%) rotate(-15deg) scale(1.5)",
                 zIndex: 20,
                 pointerEvents: "none",
                 animation: "moggedFlash 1.2s ease-in-out forwards",
