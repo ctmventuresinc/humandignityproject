@@ -63,6 +63,22 @@ const drawScanningLine = (
   const totalCycle = countdownDuration + scanDuration + waitDuration; // 7 seconds total
 
   const timeInCycle = (now - startTime) % totalCycle;
+  
+  // Generate consistent stats (same throughout all phases)
+  const isCurrentlyMogging = color === "#03FF07";
+  
+  const objectiveCategories = isCurrentlyMogging ? objectiveGood : objectiveBad;
+  const funnyCategories = isCurrentlyMogging ? funnyGood : funnyBad;
+  
+  const objectiveIndex = (startTime * 7) % objectiveCategories.length;
+  const funny1Index = (startTime * 11) % funnyCategories.length;
+  const funny2Index = (startTime * 13) % funnyCategories.length;
+  
+  const cycleStats = [
+    generateStat(objectiveCategories[objectiveIndex], isCurrentlyMogging, startTime + 111),
+    generateStat(funnyCategories[funny1Index], isCurrentlyMogging, startTime + 222),
+    generateStat(funnyCategories[funny2Index], isCurrentlyMogging, startTime + 333)
+  ];
   const wasScanning =
     window.localStorage.getItem("currentlyScanning") === "true";
   const isCountdown = timeInCycle <= countdownDuration;
@@ -105,6 +121,22 @@ const drawScanningLine = (
       // Draw text without glow
       ctx.fillStyle = "#FFFFFF";
       ctx.fillText(countdownNumber.toString(), centerX, centerY);
+
+      // Show stats during countdown too (but not for calculating state)
+      if (color !== "#00FFFF") { // Don't show for cyan calculating state
+        const statsX = scaledX + scaledWidth + 20;
+        const statsStartY = scaledY + 20;
+        
+        ctx.font = "bold 24px Helvetica, Arial, sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillStyle = color;
+        
+        // Show all 3 stats during countdown
+        cycleStats.forEach((stat: string, index: number) => {
+          ctx.fillText(stat, statsX, statsStartY + (index * 35));
+        });
+      }
     }
   }
 
@@ -145,24 +177,7 @@ const drawScanningLine = (
   
   // During wait period, show stats to the right of bounding box
   const isWaitPeriod = timeInCycle > countdownDuration + scanDuration;
-  if (isWaitPeriod) {
-    // Get the current state from localStorage or determine from color
-    const isCurrentlyMogging = color === "#03FF07"; // Green = mogging, Red = mogged
-    const objectiveCategories = isCurrentlyMogging ? objectiveGood : objectiveBad;
-    const funnyCategories = isCurrentlyMogging ? funnyGood : funnyBad;
-    
-    // Select 1 objective + 2 funny stats for this cycle
-    const scanCycleNumber = Math.floor((now - startTime) / totalCycle);
-    const objectiveIndex = (startTime + scanCycleNumber * 7) % objectiveCategories.length;
-    const funny1Index = (startTime + scanCycleNumber * 11) % funnyCategories.length;
-    const funny2Index = (startTime + scanCycleNumber * 13) % funnyCategories.length;
-    
-    const stats = [
-      generateStat(objectiveCategories[objectiveIndex], isCurrentlyMogging, startTime + 111),
-      generateStat(funnyCategories[funny1Index], isCurrentlyMogging, startTime + 222),
-      generateStat(funnyCategories[funny2Index], isCurrentlyMogging, startTime + 333)
-    ];
-    
+  if (isWaitPeriod && color !== "#00FFFF") { // Don't show for cyan calculating state
     // Draw stats to the right of bounding box
     const statsX = scaledX + scaledWidth + 20;
     const statsStartY = scaledY + 20;
@@ -172,7 +187,8 @@ const drawScanningLine = (
     ctx.textBaseline = "top";
     ctx.fillStyle = color; // Use same color as bounding box
     
-    stats.forEach((stat, index) => {
+    // Show all 3 stats during wait period
+    cycleStats.forEach((stat: string, index: number) => {
       ctx.fillText(stat, statsX, statsStartY + (index * 35));
     });
   }
