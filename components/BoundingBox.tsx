@@ -14,6 +14,52 @@ const loadingPhrases = [
   "Processing mog levels..."
 ];
 
+const moggedStats = [
+  "-20 jawline",
+  "-15 cheekbones", 
+  "-30 height",
+  "-25 hunter eyes",
+  "-10 facial symmetry",
+  "-40 jaw width",
+  "-18 canthal tilt",
+  "-22 chin projection",
+  "-35 shoulder width",
+  "-12 eye area ratio",
+  "-28 brow ridge",
+  "-16 nasal bridge",
+  "-33 facial thirds",
+  "-19 zygomatic arch",
+  "-26 mandible angle",
+  "-14 philtrum length",
+  "-31 neck thickness",
+  "-17 temporal hollowing",
+  "-23 maxilla forward growth",
+  "-29 overall dimorphism"
+];
+
+const moggingStats = [
+  "+45 jaw dominance",
+  "+38 chad energy",
+  "+42 height mogs",
+  "+35 hunter eyes",
+  "+40 facial harmony",
+  "+33 bone structure",
+  "+37 canthal tilt",
+  "+44 chin power",
+  "+41 frame size",
+  "+36 eye appeal",
+  "+39 brow ridge",
+  "+34 nose aesthetic",
+  "+43 golden ratio",
+  "+32 cheekbone pop",
+  "+38 jaw angle",
+  "+35 philtrum game",
+  "+41 neck gains",
+  "+37 temple depth",
+  "+44 forward growth",
+  "+40 alpha vibes"
+];
+
 // Helper function to draw scanning line animation
 const drawScanningLine = (
   ctx: CanvasRenderingContext2D,
@@ -109,17 +155,46 @@ const drawScanningLine = (
     const loadingPhrase = loadingPhrases[phraseIndex];
     
     const centerX = scaledX + scaledWidth / 2;
-    const cinzelFontFamily = getComputedStyle(document.body)
-      .getPropertyValue("--font-cinzel")
-      .trim();
     
-    ctx.font = `bold 32px ${cinzelFontFamily || "serif"}`;
+    ctx.font = "bold 32px Helvetica, Arial, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     ctx.fillStyle = "#FFFFFF";
     ctx.fillText(loadingPhrase, centerX, scaledY + scaledHeight + 120);
   }
-  // During wait period, nothing is drawn
+  
+  // During wait period, show stats to the right of bounding box
+  const isWaitPeriod = timeInCycle > countdownDuration + scanDuration;
+  if (isWaitPeriod) {
+    // Get the current state from localStorage or determine from color
+    const isCurrentlyMogging = color === "#03FF07"; // Green = mogging, Red = mogged
+    const statsArray = isCurrentlyMogging ? moggingStats : moggedStats;
+    
+    // Select 3 random stats for this cycle
+    const scanCycleNumber = Math.floor((now - startTime) / totalCycle);
+    const stat1Index = (startTime + scanCycleNumber * 1111) % statsArray.length;
+    const stat2Index = (startTime + scanCycleNumber * 2222) % statsArray.length;
+    const stat3Index = (startTime + scanCycleNumber * 3333) % statsArray.length;
+    
+    const stats = [
+      statsArray[stat1Index],
+      statsArray[stat2Index], 
+      statsArray[stat3Index]
+    ];
+    
+    // Draw stats to the right of bounding box
+    const statsX = scaledX + scaledWidth + 20;
+    const statsStartY = scaledY + 20;
+    
+    ctx.font = "bold 24px Helvetica, Arial, sans-serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillStyle = color; // Use same color as bounding box
+    
+    stats.forEach((stat, index) => {
+      ctx.fillText(stat, statsX, statsStartY + (index * 35));
+    });
+  }
 };
 
 export const DefaultBoundingBox = ({
