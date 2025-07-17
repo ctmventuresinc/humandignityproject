@@ -72,3 +72,4 @@ When in duo mode, style settings are overridden for testing:
 - **Modular**: Separated concerns across hooks/components/utils
 - **Error Handling**: Graceful camera permission failures
 - **Performance**: 30fps face detection with smoothing algorithms
+- **Parity Rule**: Any changes made to single player mode must also be applied to multiplayer mode

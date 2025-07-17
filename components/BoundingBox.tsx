@@ -5,6 +5,15 @@ interface LabeledBoundingBoxProps extends BoundingBoxProps {
   text: string;
 }
 
+const loadingPhrases = [
+  "Analyzing mog potential...",
+  "Calculating mogging ratios...", 
+  "Determining who's mogging who...",
+  "Measuring jaw angles...",
+  "Evaluating mog status...",
+  "Processing mog levels..."
+];
+
 // Helper function to draw scanning line animation
 const drawScanningLine = (
   ctx: CanvasRenderingContext2D,
@@ -92,6 +101,23 @@ const drawScanningLine = (
     // Reset shadow
     ctx.shadowColor = "transparent";
     ctx.shadowBlur = 0;
+
+    // Draw loading phrase below the bounding box during scanning
+    // Use the current scan cycle number to get a different phrase each cycle
+    const scanCycleNumber = Math.floor((now - startTime) / totalCycle);
+    const phraseIndex = (startTime + scanCycleNumber * 1337) % loadingPhrases.length;
+    const loadingPhrase = loadingPhrases[phraseIndex];
+    
+    const centerX = scaledX + scaledWidth / 2;
+    const cinzelFontFamily = getComputedStyle(document.body)
+      .getPropertyValue("--font-cinzel")
+      .trim();
+    
+    ctx.font = `bold 32px ${cinzelFontFamily || "serif"}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(loadingPhrase, centerX, scaledY + scaledHeight + 120);
   }
   // During wait period, nothing is drawn
 };
