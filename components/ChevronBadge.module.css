@@ -1,65 +1,47 @@
-.chevronBadge {
-  /* default (magenta) values – overridden by variant classes */
-  --primary: #d400ff;
-
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
+.hexagon {
+  background: #0858A6;
+  color: #00e1ff;
   font-family: "Inter", sans-serif;
   font-weight: 700;
-  letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: #ffffff;
-
-  background: var(--primary);
-  border: 2px solid var(--primary);
-  height: 48px;                /* large default */
-  padding: 0 28px;             /* large default */
-
-  /* chevron / arrow shape */
-  clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 50%, 100% 100%, 14px 100%, 0 50%);
-
-  /* outer neon glow */
-  box-shadow:
-    0 0 4px   var(--primary),
-    0 0 8px   var(--primary),
-    0 0 16px  var(--primary);
+  letter-spacing: 0.05em;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  position: relative;
+  clip-path: polygon(15px 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0 50%);
 }
 
-/* inner stroke for double‑line neon effect */
-.chevronBadge::before {
+.hexagon::before {
   content: "";
   position: absolute;
-  inset: 6px; /* distance between outer and inner stroke */
-  border: 2px solid var(--primary);
-  clip-path: inherit; /* match parent chevron */
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  background: #1a237e;
+  clip-path: polygon(13px 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 13px 100%, 0 50%);
+  z-index: -1;
 }
 
-/* ===== Variant colours ===== */
 .cyan {
-  --primary: #00e1ff;
+  color: #00e1ff;
 }
 
 .magenta {
-  --primary: #d400ff;
+  color: #d400ff;
 }
 
-/* ===== Size modifiers ===== */
 .small {
-  font-size: 16px;
   height: 32px;
-  padding: 0 18px;
+  padding: 0 20px;
+  font-size: 14px;
 }
 
 .large {
-  font-size: 20px;
   height: 48px;
-  padding: 0 28px;
-}
-
-/* Optional: crisp pixel rendering for neon */
-.chevronBadge, .chevronBadge::before {
-  image-rendering: pixelated;
+  padding: 0 30px;
+  font-size: 18px;
 }
