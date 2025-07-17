@@ -65,10 +65,15 @@ export const DefaultBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   const scaledWidth = detection.box.width * scaleX;
   const scaledHeight = detection.box.height * scaleY;
   
-  // Orange bounding box for calculating state
-  ctx.strokeStyle = '#FF8800';
+  // Cyan bounding box for calculating state
+  ctx.strokeStyle = '#00FFFF';
   ctx.lineWidth = 5;
+  
+  // Create glow effect
+  ctx.shadowColor = '#00FFFF';
+  ctx.shadowBlur = 5;
   ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+  ctx.shadowBlur = 0;
   
   // Draw label underneath box
   const labelX = scaledX;
@@ -76,20 +81,20 @@ export const DefaultBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   const labelWidth = scaledWidth;
   const labelHeight = 80;
   
-  // Draw translucent rounded background
-  ctx.fillStyle = 'rgba(255, 136, 0, 0.4)';
-  ctx.shadowColor = '#FF8800';
+  // Draw translucent rounded background with glow
+  ctx.fillStyle = 'rgba(0, 255, 255, 0.4)';
+  ctx.shadowColor = '#00FFFF';
   ctx.shadowBlur = 12;
   ctx.beginPath();
   ctx.roundRect(labelX, labelY, labelWidth, labelHeight, 16);
   ctx.fill();
   
-  // Draw white text
+  // Draw white text with glow
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 40px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.shadowColor = '#FF8800';
+  ctx.shadowColor = '#00FFFF';
   ctx.shadowBlur = 3;
   ctx.fillText('CALCULATING', labelX + labelWidth/2, labelY + labelHeight/2);
   
@@ -98,7 +103,7 @@ export const DefaultBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   ctx.shadowBlur = 0;
   
   // Add scanning line animation
-  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, '#FF8800');
+  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, '#00FFFF');
 };
 
 export const LabeledBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx, color, text }: LabeledBoundingBoxProps) => {

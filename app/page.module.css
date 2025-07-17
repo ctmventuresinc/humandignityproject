@@ -21,7 +21,7 @@
   transform-origin: center top;
   font-family: "Helvetica", Arial, sans-serif;
   font-weight: bold;
-  color: #ffff00;
+  color: #FFFF00;
   font-size: 8rem;
   text-align: center;
   text-transform: uppercase;
@@ -112,5 +112,59 @@
   .videoContainer {
     width: 60vh;
     height: 60vh;
+  }
+}
+
+@keyframes orangeFlash {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes moggedFlash {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-15deg) scale(1.5);
+  }
+  8% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-12deg) scale(1.6);
+  }
+  16% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-15deg) scale(1.5);
+  }
+  24% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-18deg) scale(1.4);
+  }
+  32% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-15deg) scale(1.5);
+  }
+  40% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-12deg) scale(1.6);
+  }
+  48% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-15deg) scale(1.5);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-15deg) scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-15deg) scale(1.2);
   }
 }

@@ -18,6 +18,8 @@ export default function Home() {
   const [isDuoMode, setIsDuoMode] = useState<boolean>(false); // Default to singleplayer
   const [faceDetected, setFaceDetected] = useState<boolean>(false);
   const [moggingState, setMoggingState] = useState<'calculating' | 'mogging' | 'mogged'>('calculating');
+  const [showOrangeFlash, setShowOrangeFlash] = useState<boolean>(false);
+  const [showMoggedOverlay, setShowMoggedOverlay] = useState<boolean>(false);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Bounding box style selector
@@ -84,11 +86,10 @@ export default function Home() {
       const hasDetections = event.detail && event.detail.length > 0;
       if (hasDetections && !faceDetected) {
         setFaceDetected(true);
-        // Store the start time for scanning line animation
+        
+        // Start scanning line animation immediately when face detected
         window.localStorage.setItem('faceDetectionStarted', Date.now().toString());
         window.localStorage.setItem('currentlyScanning', 'false');
-        // Set initial state to mogging when face detection starts
-        setMoggingState('mogging');
       }
     };
     
@@ -102,7 +103,30 @@ export default function Home() {
   // Listen for scan end events to switch state
   useEffect(() => {
     const handleScanEnd = () => {
-      setMoggingState(prev => prev === 'mogging' ? 'mogged' : 'mogging');
+      setMoggingState(prev => {
+        const nextState = prev === 'calculating' ? 'mogging' : (prev === 'mogging' ? 'mogged' : 'mogging');
+        
+        // If switching to mogged, trigger orange flash and overlay
+        if (nextState === 'mogged') {
+          // First flash
+          setShowOrangeFlash(true);
+          setTimeout(() => setShowOrangeFlash(false), 100); // Flash for 100ms
+          
+          // Second flash
+          setTimeout(() => {
+            setShowOrangeFlash(true);
+            setTimeout(() => setShowOrangeFlash(false), 100); // Flash for 100ms
+          }, 150);
+          
+          // Start mogged graphic after both flashes
+          setTimeout(() => {
+            setShowMoggedOverlay(true);
+            setTimeout(() => setShowMoggedOverlay(false), 1500); // Show overlay for 1.5 seconds
+          }, 400);
+        }
+        
+        return nextState;
+      });
     };
     
     window.addEventListener('scanEnd', handleScanEnd);
@@ -202,7 +226,7 @@ export default function Home() {
       <div
         ref={overlayRef}
         className={styles.overlayText}
-        style={{ color: "#FFF" }}
+        style={{ color: "#FFFF00" }}
       >
         {textMessages[currentTextIndex]}
       </div>
@@ -234,6 +258,43 @@ export default function Home() {
             style={boundingBoxStyle}
             mode={detectionMode}
           />
+          
+          {/* Orange flash overlay */}
+          {showOrangeFlash && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(254, 107, 0, 0.6)',
+              pointerEvents: 'none',
+              zIndex: 10
+            }} />
+          )}
+          
+          {/* Mogged overlay */}
+          {showMoggedOverlay && (
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%) rotate(-15deg) scale(1.5)',
+              zIndex: 20,
+              pointerEvents: 'none',
+              animation: 'moggedFlash 1.2s ease-in-out forwards'
+            }}>
+              <img 
+                src="/mogged.png" 
+                alt="MOGGED" 
+                style={{
+                  width: '350px',
+                  height: 'auto',
+                  filter: 'drop-shadow(0 0 25px #FF073A)'
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
       
