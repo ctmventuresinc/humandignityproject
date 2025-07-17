@@ -105,11 +105,16 @@ export default function Home() {
         left: '15px',
         zIndex: 1000,
         display: 'flex',
-        alignItems: 'center',
-        gap: '12px'
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: '0px'
       }}>
-        <ChevronBadge label="LIVE" variant="cyan" size="small" />
-        <ChevronBadge label="菫色いさん" variant="magenta" size="large" />
+        <div style={{ transform: 'scale(0.85)' }}>
+          <ChevronBadge label="LIVE" variant="cyan" size="small" />
+        </div>
+        <div style={{ marginTop: '-20px' }}>
+          <ChevronBadge label="菫色いさん" variant="magenta" size="large" />
+        </div>
       </div>
       
       {/* Singleplayer/Multiplayer Mode Toggle */}
