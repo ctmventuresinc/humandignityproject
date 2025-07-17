@@ -14,53 +14,47 @@ const loadingPhrases = [
   "Processing mog levels..."
 ];
 
-const moggedStatLabels = [
-  "jawline",
-  "cheekbones", 
-  "height",
-  "hunter eyes",
-  "facial symmetry",
-  "jaw width",
-  "canthal tilt",
-  "chin projection",
-  "shoulder width",
-  "eye area ratio",
-  "brow ridge",
-  "nasal bridge",
-  "facial thirds",
-  "zygomatic arch",
-  "mandible angle",
-  "philtrum length",
-  "neck thickness",
-  "temporal hollowing",
-  "maxilla forward growth",
-  "overall dimorphism"
+const badQualities = [
+  "weak chin", 
+  "receding hairline",
+  "beady eyes", 
+  "no sex appeal", 
+  "bad skin", 
+  "weak jawline",
+  "watches ig reels",
+  "social anxiety", 
+  "no game", 
+  "friendzone material", 
+  "incel energy"
 ];
 
-const moggingStatLabels = [
-  "jaw dominance",
-  "chad energy",
-  "height mogs",
+const goodQualities = [
+  "jaw dominance", 
+  "has 401k",
+  "chad energy", 
   "hunter eyes",
-  "facial harmony",
   "bone structure",
-  "canthal tilt",
-  "chin power",
-  "frame size",
-  "eye appeal",
-  "brow ridge",
-  "nose aesthetic",
+  "has sex", 
+  "fucks", 
+  "nose ", 
   "golden ratio",
-  "cheekbone pop",
+   "cheekbones", 
   "jaw angle",
-  "philtrum game",
-  "neck gains",
-  "temple depth",
-  "forward growth",
-  "alpha vibes"
+  "doesnt listen to travis scott",
+  "alpha vibes", 
+  "aura", 
+  "rizz", 
+  "gyatt",
+  "potentially gay", 
+  "zesty"
 ];
 
-const getRandomStatNumber = () => Math.floor(Math.random() * 9) + 1;
+// Generate random stat with number between 1-9
+const generateStat = (category: string, isPositive: boolean, seed: number) => {
+  const randomNum = (seed % 9) + 1; // 1-9
+  const sign = isPositive ? "+" : "-";
+  return `${sign}${randomNum} ${category}`;
+};
 
 // Helper function to draw scanning line animation
 const drawScanningLine = (
@@ -170,19 +164,16 @@ const drawScanningLine = (
   if (isWaitPeriod) {
     // Get the current state from localStorage or determine from color
     const isCurrentlyMogging = color === "#03FF07"; // Green = mogging, Red = mogged
-    const statLabels = isCurrentlyMogging ? moggingStatLabels : moggedStatLabels;
-    const prefix = isCurrentlyMogging ? "+" : "-";
+    const categories = isCurrentlyMogging ? goodQualities : badQualities;
     
-    // Select 3 random stats for this cycle
+    // Select 3 different random stats for this cycle, ensuring they're different
     const scanCycleNumber = Math.floor((now - startTime) / totalCycle);
-    const stat1Index = (startTime + scanCycleNumber * 1111) % statLabels.length;
-    const stat2Index = (startTime + scanCycleNumber * 2222) % statLabels.length;
-    const stat3Index = (startTime + scanCycleNumber * 3333) % statLabels.length;
+    const baseIndex = (startTime + scanCycleNumber * 7) % categories.length;
     
     const stats = [
-      `${prefix}${getRandomStatNumber()} ${statLabels[stat1Index]}`,
-      `${prefix}${getRandomStatNumber()} ${statLabels[stat2Index]}`, 
-      `${prefix}${getRandomStatNumber()} ${statLabels[stat3Index]}`
+      generateStat(categories[baseIndex], isCurrentlyMogging, startTime + 111),
+      generateStat(categories[(baseIndex + 7) % categories.length], isCurrentlyMogging, startTime + 222),
+      generateStat(categories[(baseIndex + 13) % categories.length], isCurrentlyMogging, startTime + 333)
     ];
     
     // Draw stats to the right of bounding box
