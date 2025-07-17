@@ -21,6 +21,7 @@ export default function Home() {
   const [moggingState, setMoggingState] = useState<'calculating' | 'mogging' | 'mogged'>('calculating');
   const [showOrangeFlash, setShowOrangeFlash] = useState<boolean>(false);
   const [showMoggedOverlay, setShowMoggedOverlay] = useState<boolean>(false);
+  const [currentFaceCount, setCurrentFaceCount] = useState<number>(0);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Bounding box style selector
@@ -84,7 +85,11 @@ export default function Home() {
   // Listen for face detection changes
   useEffect(() => {
     const handleFaceDetectionChange = (event: any) => {
-      const hasDetections = event.detail && event.detail.length > 0;
+      const detections = event.detail || [];
+      const faceCount = detections.length;
+      setCurrentFaceCount(faceCount);
+      
+      const hasDetections = faceCount > 0;
       if (hasDetections && !faceDetected) {
         setFaceDetected(true);
         
@@ -107,8 +112,24 @@ export default function Home() {
       setMoggingState(prev => {
         const nextState = prev === 'calculating' ? 'mogging' : (prev === 'mogging' ? 'mogged' : 'mogging');
         
-        // If switching to mogged, trigger orange flash and overlay
-        if (nextState === 'mogged') {
+        // Only trigger mogged effect in valid scenarios
+        const shouldTriggerMoggedEffect = () => {
+          // Singleplayer: mogging -> mogged transition
+          if (!isDuoMode && prev === 'mogging' && nextState === 'mogged') {
+            return true;
+          }
+          
+          // Multiplayer: only if we have 2 faces and they're switching roles
+          if (isDuoMode && prev === 'mogging' && nextState === 'mogged' && currentFaceCount >= 2) {
+            // Only trigger when we actually have 2 faces competing
+            return true;
+          }
+          
+          return false;
+        };
+        
+        // If switching to mogged in valid scenarios, trigger effects
+        if (shouldTriggerMoggedEffect()) {
           // First flash
           setShowOrangeFlash(true);
           setTimeout(() => setShowOrangeFlash(false), 100); // Flash for 100ms
@@ -135,7 +156,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('scanEnd', handleScanEnd);
     };
-  }, []);
+  }, [isDuoMode, currentFaceCount]);
 
   // Dynamically scale overlay text to fill screen width (uniform scaling)
   useEffect(() => {
