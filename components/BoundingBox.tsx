@@ -58,12 +58,12 @@ const drawScanningLine = (
       const centerY = scaledY + scaledHeight / 2;
 
       // The Canvas API doesn't understand CSS variables, so we read the font family from the DOM.
-      const cormorantFontFamily = getComputedStyle(document.body)
-        .getPropertyValue("--font-cormorant")
+      const cinzelFontFamily = getComputedStyle(document.body)
+        .getPropertyValue("--font-cinzel")
         .trim();
 
-      // Use Cormorant font, falling back to a generic serif if the variable isn't found.
-      ctx.font = `bold 200px ${cormorantFontFamily || "serif"}`;
+      // Use Cinzel font (medieval style), falling back to a generic serif if the variable isn't found.
+      ctx.font = `bold 200px ${cinzelFontFamily || "serif"}`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
@@ -259,8 +259,7 @@ export const MoggedBoundingBox = ({
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
 
-  // Add scanning line animation and countdown
-  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#FF073A");
+
 };
 
 export const MoggingBoundingBox = ({
@@ -318,8 +317,7 @@ export const MoggingBoundingBox = ({
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
 
-  // Add scanning line animation and countdown
-  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#03FF07");
+
 };
 
 export const WaitingBoundingBox = ({
@@ -364,8 +362,7 @@ export const WaitingBoundingBox = ({
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
 
-  // Add scanning line animation
-  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#9D00FF");
+
 };
 
 export const SpotlightBoundingBox = ({
