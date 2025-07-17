@@ -10,7 +10,7 @@ interface ChevronBadgeProps {
 export default function ChevronBadge({ label, variant = 'magenta', size = 'large' }: ChevronBadgeProps) {
   return (
     <div className={`${styles.hexagon} ${styles[variant]} ${styles[size]}`}>
-      {label}
+      <span className={styles.text}>{label}</span>
     </div>
   );
 }

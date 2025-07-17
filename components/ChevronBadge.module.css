@@ -1,5 +1,5 @@
 .hexagon {
-  background: #0858A6;
+  background: #0858A6; /* outer stroke */
   color: #00e1ff;
   font-family: "Inter", sans-serif;
   font-weight: 700;
@@ -11,7 +11,7 @@
   justify-content: center;
   
   position: relative;
-  clip-path: polygon(15px 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0 50%);
+  clip-path: polygon(21px 0, calc(100% - 21px) 0, 100% 50%, calc(100% - 21px) 100%, 21px 100%, 0 50%);
 }
 
 .hexagon::before {
@@ -21,9 +21,26 @@
   left: 2px;
   right: 2px;
   bottom: 2px;
-  background: #1a237e;
-  clip-path: polygon(13px 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 13px 100%, 0 50%);
-  z-index: -1;
+  background: #FF0000; /* red stroke */
+  clip-path: polygon(19px 0, calc(100% - 19px) 0, 100% 50%, calc(100% - 19px) 100%, 19px 100%, 0 50%);
+  z-index: 1;
+}
+
+.hexagon::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  background: #1a237e; /* inner background */
+  clip-path: polygon(17px 0, calc(100% - 17px) 0, 100% 50%, calc(100% - 17px) 100%, 17px 100%, 0 50%);
+  z-index: 2;
+}
+
+.text {
+  position: relative;
+  z-index: 3;
 }
 
 .cyan {
