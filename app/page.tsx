@@ -14,7 +14,7 @@ export default function Home() {
   const [error, setError] = useState<string>("");
   const [currentTextIndex, setCurrentTextIndex] = useState<number>(0);
   const [smileStatus, setSmileStatus] = useState<string>('no_faces');
-  const [isDuoMode, setIsDuoMode] = useState<boolean>(true);
+  const [isDuoMode, setIsDuoMode] = useState<boolean>(false); // Default to singleplayer
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Bounding box style selector
@@ -97,23 +97,23 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      {/* Duo/Solo Mode Toggle */}
+      {/* Singleplayer/Multiplayer Mode Toggle */}
       <div style={{
         position: 'fixed',
-        top: '20px',
-        right: '20px',
+        top: '15px',
+        right: '15px',
         zIndex: 1000,
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
+        gap: '8px',
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        padding: '10px 15px',
-        borderRadius: '25px',
+        padding: '8px 12px',
+        borderRadius: '20px',
         color: 'white',
-        fontSize: '16px',
+        fontSize: '14px',
         fontWeight: 'bold'
       }}>
-        <span>Duo Mode</span>
+        <span>{isDuoMode ? 'Multiplayer' : 'Singleplayer'}</span>
         <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
           <input
             type="checkbox"
@@ -122,21 +122,21 @@ export default function Home() {
             style={{ display: 'none' }}
           />
           <div style={{
-            width: '50px',
-            height: '25px',
-            backgroundColor: isDuoMode ? '#00FF00' : '#FF0000',
-            borderRadius: '25px',
+            width: '40px',
+            height: '20px',
+            backgroundColor: isDuoMode ? '#00FF00' : '#9D00FF',
+            borderRadius: '20px',
             position: 'relative',
             transition: 'background-color 0.3s'
           }}>
             <div style={{
-              width: '21px',
-              height: '21px',
+              width: '16px',
+              height: '16px',
               backgroundColor: 'white',
               borderRadius: '50%',
               position: 'absolute',
               top: '2px',
-              left: isDuoMode ? '27px' : '2px',
+              left: isDuoMode ? '22px' : '2px',
               transition: 'left 0.3s'
             }} />
           </div>
@@ -194,21 +194,6 @@ export default function Home() {
           zIndex: 1000
         }}>
           Smiling
-        </div>
-      )}
-      
-      {smileStatus === 'not_smiling' && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: '#FF0000',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          zIndex: 1000
-        }}>
-          Not smiling
         </div>
       )}
     </div>

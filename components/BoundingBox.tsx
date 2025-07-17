@@ -16,7 +16,7 @@ export const DefaultBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   
   // Green bounding box
   ctx.strokeStyle = '#00FF00';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 5;
   ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
 };
 
@@ -31,7 +31,7 @@ export const LabeledBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   
   // Colored bounding box
   ctx.strokeStyle = color;
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 5;
   ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
   
   // Draw label underneath box
@@ -55,15 +55,131 @@ export const LabeledBoundingBox = ({ detection, canvasWidth, canvasHeight, video
 };
 
 export const MoggedBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
-  return LabeledBoundingBox({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx, color: '#FF0000', text: 'MOGGED' });
+  const scaleX = canvasWidth / videoWidth;
+  const scaleY = canvasHeight / videoHeight;
+  
+  const scaledX = detection.box.x * scaleX;
+  const scaledY = detection.box.y * scaleY;
+  const scaledWidth = detection.box.width * scaleX;
+  const scaledHeight = detection.box.height * scaleY;
+  
+  // Neon red bounding box with crisp glow
+  ctx.strokeStyle = '#FF073A';
+  ctx.lineWidth = 5;
+  
+  // Create glow effect with multiple strokes
+  ctx.shadowColor = '#FF073A';
+  ctx.shadowBlur = 5;
+  ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+  ctx.shadowBlur = 0;
+  
+  // Draw label underneath box
+  const labelX = scaledX;
+  const labelY = scaledY + scaledHeight + 20;
+  const labelWidth = scaledWidth;
+  const labelHeight = 80;
+  
+  // Draw translucent rounded background with glow
+  ctx.fillStyle = 'rgba(255, 7, 58, 0.4)'; // Semi-transparent red
+  ctx.shadowColor = '#FF073A';
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.roundRect(labelX, labelY, labelWidth, labelHeight, 16);
+  ctx.fill();
+  
+  // Draw white text with glow
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 40px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#FF073A';
+  ctx.shadowBlur = 3;
+  ctx.fillText('MOGGED', labelX + labelWidth/2, labelY + labelHeight/2);
+  
+  // Reset shadow
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
 };
 
 export const MoggingBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
-  return LabeledBoundingBox({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx, color: '#20C65F', text: 'MOGGING' });
+  const scaleX = canvasWidth / videoWidth;
+  const scaleY = canvasHeight / videoHeight;
+  
+  const scaledX = detection.box.x * scaleX;
+  const scaledY = detection.box.y * scaleY;
+  const scaledWidth = detection.box.width * scaleX;
+  const scaledHeight = detection.box.height * scaleY;
+  
+  // Neon green bounding box with crisp glow
+  ctx.strokeStyle = '#03FF07';
+  ctx.lineWidth = 5;
+  
+  // Create glow effect with multiple strokes
+  ctx.shadowColor = '#03FF07';
+  ctx.shadowBlur = 5;
+  ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+  ctx.shadowBlur = 0;
+  
+  // Draw label underneath box
+  const labelX = scaledX;
+  const labelY = scaledY + scaledHeight + 20;
+  const labelWidth = scaledWidth;
+  const labelHeight = 80;
+  
+  // Draw translucent rounded background with glow
+  ctx.fillStyle = 'rgba(3, 255, 7, 0.4)'; // Semi-transparent green
+  ctx.shadowColor = '#03FF07';
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.roundRect(labelX, labelY, labelWidth, labelHeight, 16);
+  ctx.fill();
+  
+  // Draw white text with glow
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 40px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#03FF07';
+  ctx.shadowBlur = 3;
+  ctx.fillText('MOGGING', labelX + labelWidth/2, labelY + labelHeight/2);
+  
+  // Reset shadow
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
 };
 
 export const WaitingBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
-  return LabeledBoundingBox({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx, color: '#808080', text: 'WAITING FOR PLAYER 2...' });
+  const scaleX = canvasWidth / videoWidth;
+  const scaleY = canvasHeight / videoHeight;
+  
+  const scaledX = detection.box.x * scaleX;
+  const scaledY = detection.box.y * scaleY;
+  const scaledWidth = detection.box.width * scaleX;
+  const scaledHeight = detection.box.height * scaleY;
+  
+  // Neon purple bounding box
+  ctx.strokeStyle = '#9D00FF';
+  ctx.lineWidth = 5;
+  ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+  
+  // Draw neon green text underneath box (no background)
+  const labelX = scaledX;
+  const labelY = scaledY + scaledHeight + 60; // Position for text
+  
+  // Draw neon green text with glow effect
+  ctx.fillStyle = '#00FF00';
+  ctx.font = 'bold 40px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // Add glow effect by drawing text multiple times with different alphas
+  ctx.shadowColor = '#00FF00';
+  ctx.shadowBlur = 20;
+  ctx.fillText('WAITING FOR PLAYER 2', labelX + scaledWidth/2, labelY);
+  
+  // Reset shadow
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
 };
 
 export const SpotlightBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
