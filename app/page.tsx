@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 import { FaceDetectionCanvas } from "../components/FaceDetectionCanvas";
 import { BoundingBoxStyle, DetectionMode } from "../types/face-detection";
+import ChevronBadge from "../components/ChevronBadge";
 
 const textMessages = ["mogcam.com"];
 
@@ -97,6 +98,20 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
+      {/* Top badges */}
+      <div style={{
+        position: 'fixed',
+        top: '15px',
+        left: '15px',
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px'
+      }}>
+        <ChevronBadge label="LIVE" variant="cyan" size="small" />
+        <ChevronBadge label="菫色いさん" variant="magenta" size="large" />
+      </div>
+      
       {/* Singleplayer/Multiplayer Mode Toggle */}
       <div style={{
         position: 'fixed',
