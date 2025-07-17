@@ -13,13 +13,25 @@ export default function ChevronBadge({ label, variant = 'magenta', size = 'large
     large: { fontSize: 26, padding: 30 }
   };
 
-  const colors = {
-    cyan: '#00e1ff',
-    magenta: '#d400ff'
+  const colorConfig = {
+    cyan: {
+      text: '#00e1ff',
+      background: '#182C5B',
+      stroke1: '#225398',
+      stroke2: '#85E7F7',
+      stroke3: '#1A4293'
+    },
+    magenta: {
+      text: '#FFFFFF',
+      background: '#8819A2',
+      stroke1: '#BF29E0',
+      stroke2: '#E97AF8',
+      stroke3: '#B929DC'
+    }
   };
 
   const config = sizeConfig[size];
-  const textColor = colors[variant];
+  const colors = colorConfig[variant];
   
   // Calculate dimensions based on text and padding
   const baseWidth = 131;
@@ -47,7 +59,7 @@ export default function ChevronBadge({ label, variant = 'magenta', size = 'large
         <path 
           d={`M${10 + totalStrokeWidth} ${46 + totalStrokeWidth}L${-6 + totalStrokeWidth} ${20 + totalStrokeWidth}L${9 + totalStrokeWidth} ${-6 + totalStrokeWidth}H${122 + totalStrokeWidth}L${137 + totalStrokeWidth} ${20 + totalStrokeWidth}L${121 + totalStrokeWidth} ${46 + totalStrokeWidth}H${10 + totalStrokeWidth}Z`}
           fill="none"
-          stroke="#1A4293"
+          stroke={colors.stroke3}
           strokeWidth={stroke3Width}
         />
         
@@ -55,15 +67,15 @@ export default function ChevronBadge({ label, variant = 'magenta', size = 'large
         <path 
           d={`M${12.5 + totalStrokeWidth} ${44 + totalStrokeWidth}L${-2 + totalStrokeWidth} ${20 + totalStrokeWidth}L${11.5 + totalStrokeWidth} ${-2 + totalStrokeWidth}H${119.5 + totalStrokeWidth}L${133 + totalStrokeWidth} ${20 + totalStrokeWidth}L${118.5 + totalStrokeWidth} ${44 + totalStrokeWidth}H${12.5 + totalStrokeWidth}Z`}
           fill="none"
-          stroke="#85E7F7"
+          stroke={colors.stroke2}
           strokeWidth={stroke2Width}
         />
         
         {/* Stroke 1 with background */}
         <path 
           d={`M${15.5 + totalStrokeWidth} ${41 + totalStrokeWidth}L${1 + totalStrokeWidth} ${20 + totalStrokeWidth}L${14.5 + totalStrokeWidth} ${1 + totalStrokeWidth}H${115 + totalStrokeWidth}L${129.5 + totalStrokeWidth} ${20 + totalStrokeWidth}L${114 + totalStrokeWidth} ${41 + totalStrokeWidth}H${15.5 + totalStrokeWidth}Z`}
-          fill="#182C5B"
-          stroke="#225398"
+          fill={colors.background}
+          stroke={colors.stroke1}
           strokeWidth={stroke1Width}
         />
         
@@ -83,7 +95,7 @@ export default function ChevronBadge({ label, variant = 'magenta', size = 'large
           y={centerY} 
           textAnchor="middle" 
           dominantBaseline="middle"
-          fill={textColor}
+          fill={colors.text}
           fontSize={config.fontSize}
           fontFamily="Inter, sans-serif"
           fontWeight="700"
