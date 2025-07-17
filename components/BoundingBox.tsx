@@ -14,51 +14,53 @@ const loadingPhrases = [
   "Processing mog levels..."
 ];
 
-const moggedStats = [
-  "-20 jawline",
-  "-15 cheekbones", 
-  "-30 height",
-  "-25 hunter eyes",
-  "-10 facial symmetry",
-  "-40 jaw width",
-  "-18 canthal tilt",
-  "-22 chin projection",
-  "-35 shoulder width",
-  "-12 eye area ratio",
-  "-28 brow ridge",
-  "-16 nasal bridge",
-  "-33 facial thirds",
-  "-19 zygomatic arch",
-  "-26 mandible angle",
-  "-14 philtrum length",
-  "-31 neck thickness",
-  "-17 temporal hollowing",
-  "-23 maxilla forward growth",
-  "-29 overall dimorphism"
+const moggedStatLabels = [
+  "jawline",
+  "cheekbones", 
+  "height",
+  "hunter eyes",
+  "facial symmetry",
+  "jaw width",
+  "canthal tilt",
+  "chin projection",
+  "shoulder width",
+  "eye area ratio",
+  "brow ridge",
+  "nasal bridge",
+  "facial thirds",
+  "zygomatic arch",
+  "mandible angle",
+  "philtrum length",
+  "neck thickness",
+  "temporal hollowing",
+  "maxilla forward growth",
+  "overall dimorphism"
 ];
 
-const moggingStats = [
-  "+45 jaw dominance",
-  "+38 chad energy",
-  "+42 height mogs",
-  "+35 hunter eyes",
-  "+40 facial harmony",
-  "+33 bone structure",
-  "+37 canthal tilt",
-  "+44 chin power",
-  "+41 frame size",
-  "+36 eye appeal",
-  "+39 brow ridge",
-  "+34 nose aesthetic",
-  "+43 golden ratio",
-  "+32 cheekbone pop",
-  "+38 jaw angle",
-  "+35 philtrum game",
-  "+41 neck gains",
-  "+37 temple depth",
-  "+44 forward growth",
-  "+40 alpha vibes"
+const moggingStatLabels = [
+  "jaw dominance",
+  "chad energy",
+  "height mogs",
+  "hunter eyes",
+  "facial harmony",
+  "bone structure",
+  "canthal tilt",
+  "chin power",
+  "frame size",
+  "eye appeal",
+  "brow ridge",
+  "nose aesthetic",
+  "golden ratio",
+  "cheekbone pop",
+  "jaw angle",
+  "philtrum game",
+  "neck gains",
+  "temple depth",
+  "forward growth",
+  "alpha vibes"
 ];
+
+const getRandomStatNumber = () => Math.floor(Math.random() * 9) + 1;
 
 // Helper function to draw scanning line animation
 const drawScanningLine = (
@@ -168,18 +170,19 @@ const drawScanningLine = (
   if (isWaitPeriod) {
     // Get the current state from localStorage or determine from color
     const isCurrentlyMogging = color === "#03FF07"; // Green = mogging, Red = mogged
-    const statsArray = isCurrentlyMogging ? moggingStats : moggedStats;
+    const statLabels = isCurrentlyMogging ? moggingStatLabels : moggedStatLabels;
+    const prefix = isCurrentlyMogging ? "+" : "-";
     
     // Select 3 random stats for this cycle
     const scanCycleNumber = Math.floor((now - startTime) / totalCycle);
-    const stat1Index = (startTime + scanCycleNumber * 1111) % statsArray.length;
-    const stat2Index = (startTime + scanCycleNumber * 2222) % statsArray.length;
-    const stat3Index = (startTime + scanCycleNumber * 3333) % statsArray.length;
+    const stat1Index = (startTime + scanCycleNumber * 1111) % statLabels.length;
+    const stat2Index = (startTime + scanCycleNumber * 2222) % statLabels.length;
+    const stat3Index = (startTime + scanCycleNumber * 3333) % statLabels.length;
     
     const stats = [
-      statsArray[stat1Index],
-      statsArray[stat2Index], 
-      statsArray[stat3Index]
+      `${prefix}${getRandomStatNumber()} ${statLabels[stat1Index]}`,
+      `${prefix}${getRandomStatNumber()} ${statLabels[stat2Index]}`, 
+      `${prefix}${getRandomStatNumber()} ${statLabels[stat3Index]}`
     ];
     
     // Draw stats to the right of bounding box
