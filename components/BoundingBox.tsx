@@ -14,39 +14,23 @@ const loadingPhrases = [
   "Processing mog levels..."
 ];
 
-const badQualities = [
-  "weak chin", 
-  "receding hairline",
-  "beady eyes", 
-  "no sex appeal", 
-  "bad skin", 
-  "weak jawline",
-  "watches ig reels",
-  "social anxiety", 
-  "no game", 
-  "friendzone material", 
-  "incel energy"
+const objectiveBad = [
+  "weak chin", "receding hairline", "predator eyes", "bad skin", "weak jawline"
 ];
 
-const goodQualities = [
-  "jaw dominance", 
-  "has 401k",
-  "chad energy", 
-  "hunter eyes",
-  "bone structure",
-  "has sex", 
-  "fucks", 
-  "nose ", 
-  "golden ratio",
-   "cheekbones", 
-  "jaw angle",
-  "doesnt listen to travis scott",
-  "alpha vibes", 
-  "aura", 
-  "rizz", 
-  "gyatt",
-  "potentially gay", 
-  "zesty"
+const funnyBad = [
+  "no sex appeal", "watches ig reels", "social anxiety", 
+"incel", "uses hinge",
+];
+
+const objectiveGood = [
+  "jaw dominance", "hunter eyes", "bone structure", "nice nose", "golden ratio", 
+  "cheekbones", "jaw angle", "chad energy",
+];
+
+const funnyGood = [
+  "has 401k",  "has sex", "fucks", "doesnt listen to travis scott",
+  "alpha vibes", "aura", "rizz", "gyatt", "potentially gay", "zesty", "voted for zohran"
 ];
 
 // Generate random stat with number between 1-9
@@ -164,16 +148,19 @@ const drawScanningLine = (
   if (isWaitPeriod) {
     // Get the current state from localStorage or determine from color
     const isCurrentlyMogging = color === "#03FF07"; // Green = mogging, Red = mogged
-    const categories = isCurrentlyMogging ? goodQualities : badQualities;
+    const objectiveCategories = isCurrentlyMogging ? objectiveGood : objectiveBad;
+    const funnyCategories = isCurrentlyMogging ? funnyGood : funnyBad;
     
-    // Select 3 different random stats for this cycle, ensuring they're different
+    // Select 1 objective + 2 funny stats for this cycle
     const scanCycleNumber = Math.floor((now - startTime) / totalCycle);
-    const baseIndex = (startTime + scanCycleNumber * 7) % categories.length;
+    const objectiveIndex = (startTime + scanCycleNumber * 7) % objectiveCategories.length;
+    const funny1Index = (startTime + scanCycleNumber * 11) % funnyCategories.length;
+    const funny2Index = (startTime + scanCycleNumber * 13) % funnyCategories.length;
     
     const stats = [
-      generateStat(categories[baseIndex], isCurrentlyMogging, startTime + 111),
-      generateStat(categories[(baseIndex + 7) % categories.length], isCurrentlyMogging, startTime + 222),
-      generateStat(categories[(baseIndex + 13) % categories.length], isCurrentlyMogging, startTime + 333)
+      generateStat(objectiveCategories[objectiveIndex], isCurrentlyMogging, startTime + 111),
+      generateStat(funnyCategories[funny1Index], isCurrentlyMogging, startTime + 222),
+      generateStat(funnyCategories[funny2Index], isCurrentlyMogging, startTime + 333)
     ];
     
     // Draw stats to the right of bounding box
