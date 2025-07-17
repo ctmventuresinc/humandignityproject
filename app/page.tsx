@@ -6,6 +6,7 @@ import { FaceDetectionCanvas } from "../components/FaceDetectionCanvas";
 import { BoundingBoxStyle, DetectionMode } from "../types/face-detection";
 import ChevronBadge from "../components/ChevronBadge";
 import ModeToggle from "../components/ModeToggle";
+import MobileWarning from "../components/MobileWarning";
 
 const textMessages = ["mogcam.com"];
 
@@ -23,12 +24,24 @@ export default function Home() {
   const [showMoggedOverlay, setShowMoggedOverlay] = useState<boolean>(false);
   const [currentFaceCount, setCurrentFaceCount] = useState<number>(0);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   // Bounding box style selector
   const boundingBoxStyle: BoundingBoxStyle = moggingState === 'calculating' ? 'default' : moggingState;
 
   // Detection mode based on toggle
   const detectionMode: DetectionMode = isDuoMode ? "duo" : "solo";
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -177,6 +190,11 @@ export default function Home() {
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
   }, [currentTextIndex]);
+
+  // Show mobile warning on mobile devices
+  if (isMobile) {
+    return <MobileWarning />;
+  }
 
   return (
     <div className={styles.container}>
