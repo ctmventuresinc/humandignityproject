@@ -124,12 +124,24 @@ export default function Home() {
   useEffect(() => {
     const handleScanEnd = () => {
       setMoggingState(prev => {
-        const nextState = prev === 'calculating' ? 'mogging' : (prev === 'mogging' ? 'mogged' : 'mogging');
+        let nextState: 'calculating' | 'mogging' | 'mogged';
+        
+        if (prev === 'calculating') {
+          nextState = 'mogged'; // Always start with mogged after calculating
+        } else {
+          // In single player mode, randomly choose between mogging and mogged
+          if (!isDuoMode) {
+            nextState = Math.random() < 0.5 ? 'mogging' : 'mogged';
+          } else {
+            // In duo mode, keep the original cycling behavior
+            nextState = prev === 'mogging' ? 'mogged' : 'mogging';
+          }
+        }
         
         // Only trigger mogged effect in valid scenarios
         const shouldTriggerMoggedEffect = () => {
-          // Singleplayer: mogging -> mogged transition
-          if (!isDuoMode && prev === 'mogging' && nextState === 'mogged') {
+          // Singleplayer: any transition to mogged
+          if (!isDuoMode && nextState === 'mogged') {
             return true;
           }
           
@@ -202,8 +214,8 @@ export default function Home() {
       {/* Top badges */}
       <div style={{
         position: 'fixed',
-        top: '15px',
-        left: '15px',
+        top: '0px',
+        left: '0px',
         zIndex: 1000,
         display: 'flex',
         flexDirection: 'column',

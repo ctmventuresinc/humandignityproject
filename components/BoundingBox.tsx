@@ -13,13 +13,15 @@ const drawScanningLine = (ctx: CanvasRenderingContext2D, scaledX: number, scaled
   
   const startTime = parseInt(faceDetectionStarted);
   const now = Date.now();
+  const countdownDuration = 3000; // 3 seconds countdown
   const scanDuration = 1000; // 1 second scan
-  const waitDuration = 6000; // 6 seconds wait
-  const totalCycle = scanDuration + waitDuration; // 7 seconds total
+  const waitDuration = 3000; // 3 seconds wait
+  const totalCycle = countdownDuration + scanDuration + waitDuration; // 7 seconds total
   
   const timeInCycle = (now - startTime) % totalCycle;
   const wasScanning = window.localStorage.getItem('currentlyScanning') === 'true';
-  const isScanning = timeInCycle <= scanDuration;
+  const isCountdown = timeInCycle <= countdownDuration;
+  const isScanning = timeInCycle > countdownDuration && timeInCycle <= (countdownDuration + scanDuration);
   
   // Detect scan start
   if (isScanning && !wasScanning) {
@@ -33,10 +35,31 @@ const drawScanningLine = (ctx: CanvasRenderingContext2D, scaledX: number, scaled
     window.dispatchEvent(new CustomEvent('scanEnd'));
   }
   
-  // Only draw during scan period (first 1 second of cycle)
+  // Draw countdown text during countdown period
+  if (isCountdown) {
+    const countdownNumber = Math.ceil((countdownDuration - timeInCycle) / 1000); // 3, 2, 1
+    
+    // Only show countdown if it's 3, 2, or 1
+    if (countdownNumber >= 1 && countdownNumber <= 3) {
+      // Calculate center position
+      const centerX = scaledX + scaledWidth / 2;
+      const centerY = scaledY + scaledHeight / 2;
+      
+      // Use Cormorant font (singleplayer font) - much bigger and no glow
+      ctx.font = 'bold 200px var(--font-cormorant), serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Draw text without glow
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(countdownNumber.toString(), centerX, centerY);
+    }
+  }
+  
+  // Draw scanning line during scan period
   if (isScanning) {
-    const progress = timeInCycle / scanDuration; // 0 to 1 during scan
-    const lineY = scaledY + (progress * scaledHeight);
+    const scanProgress = (timeInCycle - countdownDuration) / scanDuration; // 0 to 1 during scan
+    const lineY = scaledY + (scanProgress * scaledHeight);
     
     // Draw white scanning line with opacity and glow
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
@@ -53,7 +76,7 @@ const drawScanningLine = (ctx: CanvasRenderingContext2D, scaledX: number, scaled
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
   }
-  // During wait period (1-7 seconds), no line is drawn
+  // During wait period, nothing is drawn
 };
 
 export const DefaultBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
@@ -189,7 +212,7 @@ export const MoggedBoundingBox = ({ detection, canvasWidth, canvasHeight, videoW
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
   
-  // Add scanning line animation
+  // Add scanning line animation and countdown
   drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, '#FF073A');
 };
 
@@ -240,7 +263,7 @@ export const MoggingBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
   
-  // Add scanning line animation
+  // Add scanning line animation and countdown
   drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, '#03FF07');
 };
 
