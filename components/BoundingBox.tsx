@@ -64,32 +64,33 @@ const drawScanningLine = (
 
   const timeInCycle = (now - startTime) % totalCycle;
   
-  // Generate consistent stats (same throughout all phases)
-  const isCurrentlyMogging = color === "#03FF07";
-  
-  const objectiveCategories = isCurrentlyMogging ? objectiveGood : objectiveBad;
-  const funnyCategories = isCurrentlyMogging ? funnyGood : funnyBad;
-  
-  const objectiveIndex = (startTime * 7) % objectiveCategories.length;
-  const funny1Index = (startTime * 11) % funnyCategories.length;
-  const funny2Index = (startTime * 13) % funnyCategories.length;
-  
-  const cycleStats = [
-    generateStat(objectiveCategories[objectiveIndex], isCurrentlyMogging, startTime + 111),
-    generateStat(funnyCategories[funny1Index], isCurrentlyMogging, startTime + 222),
-    generateStat(funnyCategories[funny2Index], isCurrentlyMogging, startTime + 333)
-  ];
-  const wasScanning =
-    window.localStorage.getItem("currentlyScanning") === "true";
+  const wasScanning = window.localStorage.getItem("currentlyScanning") === "true";
   const isCountdown = timeInCycle <= countdownDuration;
-  const isScanning =
-    timeInCycle > countdownDuration &&
-    timeInCycle <= countdownDuration + scanDuration;
+  const isScanning = timeInCycle > countdownDuration && timeInCycle <= countdownDuration + scanDuration;
+  const isResult = timeInCycle > countdownDuration + scanDuration;
 
-  // Detect scan start
+  // Detect scan start - generate fresh stats
   if (isScanning && !wasScanning) {
     window.localStorage.setItem("currentlyScanning", "true");
     window.dispatchEvent(new CustomEvent("scanStart"));
+    
+    // Generate fresh stats regardless of mogging state
+    const allObjective = [...objectiveGood, ...objectiveBad];
+    const allFunny = [...funnyGood, ...funnyBad];
+    
+    const randomObjective = allObjective[Math.floor(Math.random() * allObjective.length)];
+    const randomFunny1 = allFunny[Math.floor(Math.random() * allFunny.length)];
+    const randomFunny2 = allFunny[Math.floor(Math.random() * allFunny.length)];
+    
+    const isPositive = Math.random() > 0.5;
+    
+    const freshStats = [
+      generateStat(randomObjective, isPositive, Math.floor(Math.random() * 1000)),
+      generateStat(randomFunny1, isPositive, Math.floor(Math.random() * 1000)),
+      generateStat(randomFunny2, isPositive, Math.floor(Math.random() * 1000))
+    ];
+    
+    window.localStorage.setItem("currentCycleStats", JSON.stringify(freshStats));
   }
 
   // Detect scan end
@@ -97,6 +98,10 @@ const drawScanningLine = (
     window.localStorage.setItem("currentlyScanning", "false");
     window.dispatchEvent(new CustomEvent("scanEnd"));
   }
+
+  // Get current stats if they exist
+  const storedStats = window.localStorage.getItem("currentCycleStats");
+  const cycleStats = storedStats ? JSON.parse(storedStats) : null;
 
   // Draw countdown text during countdown period
   if (isCountdown) {
@@ -122,8 +127,8 @@ const drawScanningLine = (
       ctx.fillStyle = "#FFFFFF";
       ctx.fillText(countdownNumber.toString(), centerX, centerY);
 
-      // Show stats during countdown too (but not for calculating state)
-      if (color !== "#00FFFF") { // Don't show for cyan calculating state
+      // Show stats during countdown if they exist (but not for calculating state)
+      if (color !== "#00FFFF" && cycleStats) { // Don't show for cyan calculating state
         const statsX = scaledX + scaledWidth + 20;
         const statsStartY = scaledY + 20;
         
@@ -175,9 +180,8 @@ const drawScanningLine = (
     ctx.fillText(loadingPhrase, centerX, scaledY + scaledHeight + 120);
   }
   
-  // During wait period, show stats to the right of bounding box
-  const isWaitPeriod = timeInCycle > countdownDuration + scanDuration;
-  if (isWaitPeriod && color !== "#00FFFF") { // Don't show for cyan calculating state
+  // During result period, show stats to the right of bounding box
+  if (isResult && color !== "#00FFFF" && cycleStats) { // Don't show for cyan calculating state
     // Draw stats to the right of bounding box
     const statsX = scaledX + scaledWidth + 20;
     const statsStartY = scaledY + 20;
@@ -187,7 +191,7 @@ const drawScanningLine = (
     ctx.textBaseline = "top";
     ctx.fillStyle = color; // Use same color as bounding box
     
-    // Show all 3 stats during wait period
+    // Show all 3 stats during result period
     cycleStats.forEach((stat: string, index: number) => {
       ctx.fillText(stat, statsX, statsStartY + (index * 35));
     });
