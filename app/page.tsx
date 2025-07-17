@@ -23,6 +23,12 @@ export default function Home() {
   const [moggingState, setMoggingState] = useState<
     "calculating" | "mogging" | "mogged"
   >("calculating");
+  const [face1State, setFace1State] = useState<
+    "calculating" | "mogging" | "mogged"
+  >("calculating");
+  const [face2State, setFace2State] = useState<
+    "calculating" | "mogging" | "mogged"
+  >("calculating");
   const [showOrangeFlash, setShowOrangeFlash] = useState<boolean>(false);
   const [showMoggedOverlay, setShowMoggedOverlay] = useState<boolean>(false);
   const [showGreenFlash, setShowGreenFlash] = useState<boolean>(false);
@@ -146,18 +152,48 @@ export default function Home() {
   // Listen for scan end events to switch state
   useEffect(() => {
     const handleScanEnd = () => {
-      setMoggingState((prev) => {
-        let nextState: "calculating" | "mogging" | "mogged";
+      // Only change states if faces are actually detected
+      if (currentFaceCount === 0) return;
+      
+      if (isDuoMode) {
+        // Only proceed if we have 2 faces in duo mode
+        if (currentFaceCount < 2) return;
+        // Handle duo mode - only one face can be mogging, the other must be mogged
+        // 50% chance determines which face gets to be mogging
+        const face1GetsMogging = Math.random() < 0.5;
+        
+        setFace1State((prev) => {
+          if (prev === "calculating") {
+            return "mogged"; // Always start with mogged after calculating
+          } else {
+            return face1GetsMogging ? "mogging" : "mogged";
+          }
+        });
 
-        if (prev === "calculating") {
-          nextState = "mogged"; // Always start with mogged after calculating
-        } else {
-          // Randomly choose between mogging and mogged. Same-state transitions are allowed.
-          nextState = Math.random() < 0.5 ? "mogging" : "mogged";
-        }
+        setFace2State((prev) => {
+          if (prev === "calculating") {
+            return "mogging"; // Start with mogging for face 2
+          } else {
+            return face1GetsMogging ? "mogged" : "mogging";
+          }
+        });
+      } else {
+        // Handle single player mode - only proceed if we have exactly 1 face
+        if (currentFaceCount !== 1) return;
+        
+        setMoggingState((prev) => {
+          let nextState: "calculating" | "mogging" | "mogged";
 
-        return nextState;
-      });
+          if (prev === "calculating") {
+            nextState = "mogged"; // Always start with mogged after calculating
+          } else {
+            // Randomly choose between mogging and mogged. Same-state transitions are allowed.
+            nextState = Math.random() < 0.5 ? "mogging" : "mogged";
+          }
+
+          return nextState;
+        });
+      }
     };
 
     window.addEventListener("scanEnd", handleScanEnd);
@@ -350,6 +386,8 @@ export default function Home() {
             canvasRef={canvasRef}
             style={boundingBoxStyle}
             mode={detectionMode}
+            face1State={face1State}
+            face2State={face2State}
           />
 
           {/* Orange flash overlay */}

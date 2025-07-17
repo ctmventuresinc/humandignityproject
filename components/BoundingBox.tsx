@@ -259,7 +259,8 @@ export const MoggedBoundingBox = ({
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
 
-
+  // Add scanning line animation and countdown
+  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#FF073A");
 };
 
 export const MoggingBoundingBox = ({
@@ -317,7 +318,8 @@ export const MoggingBoundingBox = ({
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
 
-
+  // Add scanning line animation and countdown
+  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#03FF07");
 };
 
 export const WaitingBoundingBox = ({

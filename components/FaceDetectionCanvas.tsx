@@ -14,6 +14,8 @@ interface FaceDetectionCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   style: BoundingBoxStyle;
   mode: DetectionMode;
+  face1State?: "calculating" | "mogging" | "mogged";
+  face2State?: "calculating" | "mogging" | "mogged";
 }
 
 export const FaceDetectionCanvas = ({
@@ -21,6 +23,8 @@ export const FaceDetectionCanvas = ({
   canvasRef,
   style,
   mode,
+  face1State,
+  face2State,
 }: FaceDetectionCanvasProps) => {
   const { detections } = useFaceDetection(videoRef.current, canvasRef.current);
   
@@ -88,11 +92,27 @@ export const FaceDetectionCanvas = ({
 
             // Render based on style and face index
             if (mode === "duo") {
-              // Face 1 = mogging, Face 2 = mogged for testing
+              // Use individual face states for duo mode
               if (i === 0) {
-                MoggingBoundingBox(boundingBoxProps);
+                // Face 1 state
+                const currentFace1State = face1State || "calculating";
+                if (currentFace1State === "calculating") {
+                  DefaultBoundingBox(boundingBoxProps);
+                } else if (currentFace1State === "mogging") {
+                  MoggingBoundingBox(boundingBoxProps);
+                } else {
+                  MoggedBoundingBox(boundingBoxProps);
+                }
               } else if (i === 1) {
-                MoggedBoundingBox(boundingBoxProps);
+                // Face 2 state
+                const currentFace2State = face2State || "calculating";
+                if (currentFace2State === "calculating") {
+                  DefaultBoundingBox(boundingBoxProps);
+                } else if (currentFace2State === "mogging") {
+                  MoggingBoundingBox(boundingBoxProps);
+                } else {
+                  MoggedBoundingBox(boundingBoxProps);
+                }
               }
             } else {
               // Solo mode - use selected style
