@@ -9,8 +9,8 @@ interface ChevronBadgeProps {
 
 export default function ChevronBadge({ label, variant = 'magenta', size = 'large' }: ChevronBadgeProps) {
   const sizeConfig = {
-    small: { fontSize: 14, padding: 20 },
-    large: { fontSize: 18, padding: 30 }
+    small: { fontSize: 20, padding: 20 },
+    large: { fontSize: 26, padding: 30 }
   };
 
   const colors = {
@@ -24,9 +24,11 @@ export default function ChevronBadge({ label, variant = 'magenta', size = 'large
   // Calculate dimensions based on text and padding
   const baseWidth = 131;
   const baseHeight = 42;
-  const strokeCount = 2; // yellow + red
-  const strokeWidth = 2;
-  const totalStrokeWidth = strokeCount * strokeWidth;
+  const strokeCount = 3; // three strokes
+  const stroke1Width = 4; // +2 thicker
+  const stroke2Width = 7; // +5 thicker  
+  const stroke3Width = 5; // +3 thicker
+  const totalStrokeWidth = stroke1Width + stroke2Width + stroke3Width;
   
   const svgWidth = baseWidth + (totalStrokeWidth * 2);
   const svgHeight = baseHeight + (totalStrokeWidth * 2);
@@ -41,23 +43,41 @@ export default function ChevronBadge({ label, variant = 'magenta', size = 'large
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         fill="none"
       >
-        {/* Base hexagon with yellow stroke */}
+        {/* Stroke 3 (outermost) */}
+        <path 
+          d={`M${10 + totalStrokeWidth} ${46 + totalStrokeWidth}L${-6 + totalStrokeWidth} ${20 + totalStrokeWidth}L${9 + totalStrokeWidth} ${-6 + totalStrokeWidth}H${122 + totalStrokeWidth}L${137 + totalStrokeWidth} ${20 + totalStrokeWidth}L${121 + totalStrokeWidth} ${46 + totalStrokeWidth}H${10 + totalStrokeWidth}Z`}
+          fill="none"
+          stroke="#1A4293"
+          strokeWidth={stroke3Width}
+        />
+        
+        {/* Stroke 2 */}
+        <path 
+          d={`M${12.5 + totalStrokeWidth} ${44 + totalStrokeWidth}L${-2 + totalStrokeWidth} ${20 + totalStrokeWidth}L${11.5 + totalStrokeWidth} ${-2 + totalStrokeWidth}H${119.5 + totalStrokeWidth}L${133 + totalStrokeWidth} ${20 + totalStrokeWidth}L${118.5 + totalStrokeWidth} ${44 + totalStrokeWidth}H${12.5 + totalStrokeWidth}Z`}
+          fill="none"
+          stroke="#85E7F7"
+          strokeWidth={stroke2Width}
+        />
+        
+        {/* Stroke 1 with background */}
         <path 
           d={`M${15.5 + totalStrokeWidth} ${41 + totalStrokeWidth}L${1 + totalStrokeWidth} ${20 + totalStrokeWidth}L${14.5 + totalStrokeWidth} ${1 + totalStrokeWidth}H${115 + totalStrokeWidth}L${129.5 + totalStrokeWidth} ${20 + totalStrokeWidth}L${114 + totalStrokeWidth} ${41 + totalStrokeWidth}H${15.5 + totalStrokeWidth}Z`}
-          fill="#1a237e"
-          stroke="#FFFF00"
-          strokeWidth="2"
+          fill="#182C5B"
+          stroke="#225398"
+          strokeWidth={stroke1Width}
         />
         
-        {/* Red outer stroke */}
-        <path 
-          d={`M${13.5 + totalStrokeWidth} ${43 + totalStrokeWidth}L${-1 + totalStrokeWidth} ${20 + totalStrokeWidth}L${12.5 + totalStrokeWidth} ${-1 + totalStrokeWidth}H${117 + totalStrokeWidth}L${131.5 + totalStrokeWidth} ${20 + totalStrokeWidth}L${116 + totalStrokeWidth} ${43 + totalStrokeWidth}H${13.5 + totalStrokeWidth}Z`}
-          fill="none"
-          stroke="#FF0000"
-          strokeWidth="2"
-        />
+        {/* Text with neon glow */}
+        <defs>
+          <filter id="neonGlow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge> 
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
         
-        {/* Text */}
         <text 
           x={centerX} 
           y={centerY} 
@@ -69,6 +89,7 @@ export default function ChevronBadge({ label, variant = 'magenta', size = 'large
           fontWeight="700"
           letterSpacing="0.05em"
           style={{ textTransform: 'uppercase' }}
+          filter="url(#neonGlow)"
         >
           {label}
         </text>
