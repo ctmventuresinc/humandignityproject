@@ -5,6 +5,38 @@ interface LabeledBoundingBoxProps extends BoundingBoxProps {
   text: string;
 }
 
+// Helper function to draw scanning line animation
+const drawScanningLine = (ctx: CanvasRenderingContext2D, scaledX: number, scaledY: number, scaledWidth: number, scaledHeight: number, color: string) => {
+  const now = Date.now();
+  const scanDuration = 1000; // 1 second scan
+  const waitDuration = 6000; // 6 seconds wait
+  const totalCycle = scanDuration + waitDuration; // 7 seconds total
+  
+  const timeInCycle = now % totalCycle;
+  
+  // Only draw during scan period (first 1 second of cycle)
+  if (timeInCycle <= scanDuration) {
+    const progress = timeInCycle / scanDuration; // 0 to 1 during scan
+    const lineY = scaledY + (progress * scaledHeight);
+    
+    // Draw white scanning line with opacity and glow
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+    ctx.shadowBlur = 8;
+    
+    ctx.beginPath();
+    ctx.moveTo(scaledX, lineY);
+    ctx.lineTo(scaledX + scaledWidth, lineY);
+    ctx.stroke();
+    
+    // Reset shadow
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+  }
+  // During wait period (1-7 seconds), no line is drawn
+};
+
 export const DefaultBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
   const scaleX = canvasWidth / videoWidth;
   const scaleY = canvasHeight / videoHeight;
@@ -99,6 +131,9 @@ export const MoggedBoundingBox = ({ detection, canvasWidth, canvasHeight, videoW
   // Reset shadow
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
+  
+  // Add scanning line animation
+  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, '#FF073A');
 };
 
 export const MoggingBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
@@ -146,6 +181,9 @@ export const MoggingBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   // Reset shadow
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
+  
+  // Add scanning line animation
+  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, '#03FF07');
 };
 
 export const WaitingBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
@@ -180,6 +218,9 @@ export const WaitingBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   // Reset shadow
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
+  
+  // Add scanning line animation
+  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, '#9D00FF');
 };
 
 export const SpotlightBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx }: BoundingBoxProps) => {
