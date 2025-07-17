@@ -17,18 +17,35 @@ export default function Home() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
   const [currentTextIndex, setCurrentTextIndex] = useState<number>(0);
-  const [smileStatus, setSmileStatus] = useState<string>('no_faces');
+  const [smileStatus, setSmileStatus] = useState<string>("no_faces");
   const [isDuoMode, setIsDuoMode] = useState<boolean>(false); // Default to singleplayer
   const [faceDetected, setFaceDetected] = useState<boolean>(false);
-  const [moggingState, setMoggingState] = useState<'calculating' | 'mogging' | 'mogged'>('calculating');
+  const [moggingState, setMoggingState] = useState<
+    "calculating" | "mogging" | "mogged"
+  >("calculating");
   const [showOrangeFlash, setShowOrangeFlash] = useState<boolean>(false);
   const [showMoggedOverlay, setShowMoggedOverlay] = useState<boolean>(false);
+  const [showGreenFlash, setShowGreenFlash] = useState<boolean>(false);
+  const [showMoggingOverlay, setShowMoggingOverlay] = useState<boolean>(false);
   const [currentFaceCount, setCurrentFaceCount] = useState<number>(0);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
+  // Keep track of previous state and any active timers so we can cancel them
+  const prevMoggingStateRef = useRef<"calculating" | "mogging" | "mogged">(
+    moggingState
+  );
+  const effectTimersRef = useRef<number[]>([]);
+
+  // Helper to clear all scheduled timers in our effect sequence
+  const clearEffectTimers = () => {
+    effectTimersRef.current.forEach((id) => clearTimeout(id));
+    effectTimersRef.current = [];
+  };
+
   // Bounding box style selector
-  const boundingBoxStyle: BoundingBoxStyle = moggingState === 'calculating' ? 'default' : moggingState;
+  const boundingBoxStyle: BoundingBoxStyle =
+    moggingState === "calculating" ? "default" : moggingState;
 
   // Detection mode based on toggle
   const detectionMode: DetectionMode = isDuoMode ? "duo" : "solo";
@@ -38,7 +55,7 @@ export default function Home() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -88,11 +105,11 @@ export default function Home() {
     const handleSmileStatusChange = (event: any) => {
       setSmileStatus(event.detail);
     };
-    
-    window.addEventListener('smileStatusChange', handleSmileStatusChange);
-    
+
+    window.addEventListener("smileStatusChange", handleSmileStatusChange);
+
     return () => {
-      window.removeEventListener('smileStatusChange', handleSmileStatusChange);
+      window.removeEventListener("smileStatusChange", handleSmileStatusChange);
     };
   }, []);
 
@@ -102,87 +119,128 @@ export default function Home() {
       const detections = event.detail || [];
       const faceCount = detections.length;
       setCurrentFaceCount(faceCount);
-      
+
       const hasDetections = faceCount > 0;
       if (hasDetections && !faceDetected) {
         setFaceDetected(true);
-        
+
         // Start scanning line animation immediately when face detected
-        window.localStorage.setItem('faceDetectionStarted', Date.now().toString());
-        window.localStorage.setItem('currentlyScanning', 'false');
+        window.localStorage.setItem(
+          "faceDetectionStarted",
+          Date.now().toString()
+        );
+        window.localStorage.setItem("currentlyScanning", "false");
       }
     };
-    
-    window.addEventListener('faceDetectionChange', handleFaceDetectionChange);
-    
+
+    window.addEventListener("faceDetectionChange", handleFaceDetectionChange);
+
     return () => {
-      window.removeEventListener('faceDetectionChange', handleFaceDetectionChange);
+      window.removeEventListener(
+        "faceDetectionChange",
+        handleFaceDetectionChange
+      );
     };
   }, [faceDetected]);
 
   // Listen for scan end events to switch state
   useEffect(() => {
     const handleScanEnd = () => {
-      setMoggingState(prev => {
-        let nextState: 'calculating' | 'mogging' | 'mogged';
-        
-        if (prev === 'calculating') {
-          nextState = 'mogged'; // Always start with mogged after calculating
+      setMoggingState((prev) => {
+        let nextState: "calculating" | "mogging" | "mogged";
+
+        if (prev === "calculating") {
+          nextState = "mogged"; // Always start with mogged after calculating
         } else {
-          // In single player mode, randomly choose between mogging and mogged
-          if (!isDuoMode) {
-            nextState = Math.random() < 0.5 ? 'mogging' : 'mogged';
-          } else {
-            // In duo mode, keep the original cycling behavior
-            nextState = prev === 'mogging' ? 'mogged' : 'mogging';
-          }
+          // Randomly choose between mogging and mogged. Same-state transitions are allowed.
+          nextState = Math.random() < 0.5 ? "mogging" : "mogged";
         }
-        
-        // Only trigger mogged effect in valid scenarios
-        const shouldTriggerMoggedEffect = () => {
-          // Singleplayer: any transition to mogged
-          if (!isDuoMode && nextState === 'mogged') {
-            return true;
-          }
-          
-          // Multiplayer: only if we have 2 faces and they're switching roles
-          if (isDuoMode && prev === 'mogging' && nextState === 'mogged' && currentFaceCount >= 2) {
-            // Only trigger when we actually have 2 faces competing
-            return true;
-          }
-          
-          return false;
-        };
-        
-        // If switching to mogged in valid scenarios, trigger effects
-        if (shouldTriggerMoggedEffect()) {
-          // First flash
-          setShowOrangeFlash(true);
-          setTimeout(() => setShowOrangeFlash(false), 100); // Flash for 100ms
-          
-          // Second flash
-          setTimeout(() => {
-            setShowOrangeFlash(true);
-            setTimeout(() => setShowOrangeFlash(false), 100); // Flash for 100ms
-          }, 150);
-          
-          // Start mogged graphic after both flashes
-          setTimeout(() => {
-            setShowMoggedOverlay(true);
-            setTimeout(() => setShowMoggedOverlay(false), 1500); // Show overlay for 1.5 seconds
-          }, 400);
-        }
-        
+
         return nextState;
       });
     };
-    
-    window.addEventListener('scanEnd', handleScanEnd);
-    
+
+    window.addEventListener("scanEnd", handleScanEnd);
+
     return () => {
-      window.removeEventListener('scanEnd', handleScanEnd);
+      window.removeEventListener("scanEnd", handleScanEnd);
     };
   }, [isDuoMode, currentFaceCount]);
+
+  // ------------------------------------------------------------
+  // Effect handler: run flashes/graphic when moggingState changes
+  // ------------------------------------------------------------
+  useEffect(() => {
+    const previous = prevMoggingStateRef.current;
+
+    // Only react if the state actually changed
+    if (moggingState === previous) return;
+
+    // Update previous state reference for next run
+    prevMoggingStateRef.current = moggingState;
+
+    // Clear any previous timers and hide all overlays/flash states
+    clearEffectTimers();
+    setShowOrangeFlash(false);
+    setShowGreenFlash(false);
+    setShowMoggedOverlay(false);
+    setShowMoggingOverlay(false);
+
+    const timers: number[] = [];
+
+    if (moggingState === "mogged") {
+      // ORANGE flash + red overlay
+      setShowOrangeFlash(true);
+      timers.push(window.setTimeout(() => setShowOrangeFlash(false), 100));
+
+      timers.push(
+        window.setTimeout(() => {
+          setShowOrangeFlash(true);
+          timers.push(window.setTimeout(() => setShowOrangeFlash(false), 100));
+        }, 150)
+      );
+
+      timers.push(
+        window.setTimeout(() => {
+          setShowMoggedOverlay(true);
+          timers.push(
+            window.setTimeout(() => setShowMoggedOverlay(false), 1500)
+          );
+        }, 400)
+      );
+    } else if (moggingState === "mogging") {
+      // GREEN flash + green overlay
+      setShowGreenFlash(true);
+      timers.push(window.setTimeout(() => setShowGreenFlash(false), 100));
+
+      timers.push(
+        window.setTimeout(() => {
+          setShowGreenFlash(true);
+          timers.push(window.setTimeout(() => setShowGreenFlash(false), 100));
+        }, 150)
+      );
+
+      timers.push(
+        window.setTimeout(() => {
+          setShowMoggingOverlay(true);
+          timers.push(
+            window.setTimeout(() => setShowMoggingOverlay(false), 1500)
+          );
+        }, 400)
+      );
+    }
+
+    effectTimersRef.current = timers;
+
+    // Cleanup when effect re-runs or component unmounts
+    return () => {
+      clearEffectTimers();
+      setShowOrangeFlash(false);
+      setShowGreenFlash(false);
+      setShowMoggedOverlay(false);
+      setShowMoggingOverlay(false);
+    };
+  }, [moggingState]);
 
   // Dynamically scale overlay text to fill screen width (uniform scaling)
   useEffect(() => {
@@ -212,34 +270,36 @@ export default function Home() {
   return (
     <div className={styles.container}>
       {/* Top badges */}
-      <div style={{
-        position: 'fixed',
-        top: '0px',
-        left: '0px',
-        zIndex: 1000,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        gap: '0px'
-      }}>
-        <div style={{ transform: 'scale(0.85)' }}>
+      <div
+        style={{
+          position: "fixed",
+          top: "0px",
+          left: "0px",
+          zIndex: 1000,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: "0px",
+        }}
+      >
+        <div style={{ transform: "scale(0.85)" }}>
           <ChevronBadge label="LIVE" variant="cyan" size="small" />
         </div>
         {/* <div style={{ marginTop: '-20px' }}>
           <ChevronBadge label="菫色いさん" variant="magenta" size="large" />
         </div> */}
       </div>
-      
+
       {/* Turtle link in top right */}
-      <a 
-        href="https://dangertesting.com" 
-        target="_blank" 
+      <a
+        href="https://dangertesting.com"
+        target="_blank"
         rel="noopener noreferrer"
         style={{
-          position: 'fixed',
-          top: '15px',
-          right: '15px',
-          zIndex: 1000
+          position: "fixed",
+          top: "15px",
+          right: "15px",
+          zIndex: 1000,
         }}
       >
         <Image
@@ -248,16 +308,14 @@ export default function Home() {
           width={40}
           height={40}
           style={{
-            transition: 'opacity 0.3s ease',
-            cursor: 'pointer'
+            transition: "opacity 0.3s ease",
+            cursor: "pointer",
           }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
         />
       </a>
-      
 
-      
       <div
         ref={overlayRef}
         className={styles.overlayText}
@@ -293,61 +351,108 @@ export default function Home() {
             style={boundingBoxStyle}
             mode={detectionMode}
           />
-          
+
           {/* Orange flash overlay */}
           {showOrangeFlash && (
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(254, 107, 0, 0.6)',
-              pointerEvents: 'none',
-              zIndex: 10
-            }} />
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(254, 107, 0, 0.6)",
+                pointerEvents: "none",
+                zIndex: 10,
+              }}
+            />
           )}
-          
+
+          {/* Green flash overlay */}
+          {showGreenFlash && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(32, 201, 95, 0.6)", // Green
+                pointerEvents: "none",
+                zIndex: 10,
+              }}
+            />
+          )}
+
           {/* Mogged overlay */}
           {showMoggedOverlay && (
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%) rotate(-15deg) scale(1.5)',
-              zIndex: 20,
-              pointerEvents: 'none',
-              animation: 'moggedFlash 1.2s ease-in-out forwards'
-            }}>
-              <img 
-                src="/mogged.png" 
-                alt="MOGGED" 
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%) rotate(-15deg) scale(1.5)",
+                zIndex: 20,
+                pointerEvents: "none",
+                animation: "moggedFlash 1.2s ease-in-out forwards",
+              }}
+            >
+              <img
+                src="/mogged.png"
+                alt="MOGGED"
                 style={{
-                  width: '350px',
-                  height: 'auto',
-                  filter: 'drop-shadow(0 0 25px #FF073A)'
+                  width: "350px",
+                  height: "auto",
+                  filter: "drop-shadow(0 0 25px #FF073A)",
+                }}
+              />
+            </div>
+          )}
+
+          {/* Mogging overlay */}
+          {showMoggingOverlay && (
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%) rotate(-15deg) scale(1.5)",
+                zIndex: 20,
+                pointerEvents: "none",
+                animation: "moggedFlash 1.2s ease-in-out forwards",
+              }}
+            >
+              <img
+                src="/mogging.png"
+                alt="MOGGING"
+                style={{
+                  width: "350px",
+                  height: "auto",
+                  filter: "drop-shadow(0 0 25px #20C95F)",
                 }}
               />
             </div>
           )}
         </div>
       )}
-      
+
       {/* Mode Toggle Component */}
       <ModeToggle isDuoMode={isDuoMode} onToggle={setIsDuoMode} />
-      
+
       {/* Smile status at bottom of website */}
-      {smileStatus === 'smiling' && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: '#00FF00',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          zIndex: 1000
-        }}>
+      {smileStatus === "smiling" && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            color: "#00FF00",
+            fontSize: "24px",
+            fontWeight: "bold",
+            zIndex: 1000,
+          }}
+        >
           Smiling
         </div>
       )}
