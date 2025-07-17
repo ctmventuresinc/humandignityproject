@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import styles from "./page.module.css";
 import { FaceDetectionCanvas } from "../components/FaceDetectionCanvas";
 import { BoundingBoxStyle, DetectionMode } from "../types/face-detection";
@@ -216,6 +217,32 @@ export default function Home() {
           <ChevronBadge label="菫色いさん" variant="magenta" size="large" />
         </div> */}
       </div>
+      
+      {/* Turtle link in top right */}
+      <a 
+        href="https://dangertesting.com" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style={{
+          position: 'fixed',
+          top: '15px',
+          right: '15px',
+          zIndex: 1000
+        }}
+      >
+        <Image
+          src="/mogturtle.png"
+          alt="turtle"
+          width={40}
+          height={40}
+          style={{
+            transition: 'opacity 0.3s ease',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+        />
+      </a>
       
 
       
