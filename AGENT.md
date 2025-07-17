@@ -10,6 +10,7 @@
 ## Project Architecture
 - **Framework**: Next.js 15 with App Router (TypeScript)
 - **Face Detection**: face-api.js with TinyFaceDetector model
+- **Additional Libraries**: @tensorflow-models/body-pix, opencv-ts
 - **Styling**: CSS Modules (no Tailwind)
 - **Camera**: WebRTC getUserMedia API
 
@@ -40,8 +41,10 @@ When in duo mode, style settings are overridden for testing:
 ### Key Features
 - **Face Tracking** - Maintains consistent face IDs to prevent switching
 - **Smoothing** - Anti-jitter system for stable bounding boxes
-- **Text Cycling** - Rotating text messages overlay on video
-- **Mobile Optimized** - Square video frame, mobile-first design
+- **Text Cycling** - Rotating text messages overlay on video ("mogcam.com")
+- **Mobile Optimized** - Square video frame (1280x1280), mobile-first design
+- **Smile Detection** - Shows smiling/not smiling status at bottom
+- **Duo/Solo Toggle** - Top-right toggle to switch between modes
 
 ### Architecture Components
 - **`hooks/useFaceDetection.ts`** - Face detection logic with tracking
@@ -49,14 +52,23 @@ When in duo mode, style settings are overridden for testing:
 - **`components/FaceDetectionCanvas.tsx`** - Canvas orchestration
 - **`utils/faceTracker.ts`** - Face ID tracking and matching
 - **`utils/smoothing.ts`** - Bounding box smoothing algorithms
+- **`types/face-detection.ts`** - TypeScript interfaces for face detection
 
 ### Models
 - **Face Detection Model**: TinyFaceDetector (188KB)
+- **Optional Models**: Face landmarks and expressions (if available)
 - **Model Location**: `/public/models/`
 - **Detection Library**: face-api.js
 
+### Video Configuration
+- **Resolution**: 1280x1280 (square format)
+- **Camera**: Front-facing camera (facingMode: "user")
+- **Format**: WebRTC MediaStream
+
 ## Code Standards
 - **TypeScript**: Functional components, explicit types
-- **CSS Modules**: Component-scoped styling
+- **CSS Modules**: Component-scoped styling (page.module.css)
 - **Mobile-First**: Square video layout, touch-optimized
 - **Modular**: Separated concerns across hooks/components/utils
+- **Error Handling**: Graceful camera permission failures
+- **Performance**: 30fps face detection with smoothing algorithms
