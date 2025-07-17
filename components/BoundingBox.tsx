@@ -7,15 +7,34 @@ interface LabeledBoundingBoxProps extends BoundingBoxProps {
 
 // Helper function to draw scanning line animation
 const drawScanningLine = (ctx: CanvasRenderingContext2D, scaledX: number, scaledY: number, scaledWidth: number, scaledHeight: number, color: string) => {
+  // Check if face detection has started
+  const faceDetectionStarted = window.localStorage.getItem('faceDetectionStarted');
+  if (!faceDetectionStarted) return;
+  
+  const startTime = parseInt(faceDetectionStarted);
   const now = Date.now();
   const scanDuration = 1000; // 1 second scan
   const waitDuration = 6000; // 6 seconds wait
   const totalCycle = scanDuration + waitDuration; // 7 seconds total
   
-  const timeInCycle = now % totalCycle;
+  const timeInCycle = (now - startTime) % totalCycle;
+  const wasScanning = window.localStorage.getItem('currentlyScanning') === 'true';
+  const isScanning = timeInCycle <= scanDuration;
+  
+  // Detect scan start
+  if (isScanning && !wasScanning) {
+    window.localStorage.setItem('currentlyScanning', 'true');
+    window.dispatchEvent(new CustomEvent('scanStart'));
+  }
+  
+  // Detect scan end
+  if (!isScanning && wasScanning) {
+    window.localStorage.setItem('currentlyScanning', 'false');
+    window.dispatchEvent(new CustomEvent('scanEnd'));
+  }
   
   // Only draw during scan period (first 1 second of cycle)
-  if (timeInCycle <= scanDuration) {
+  if (isScanning) {
     const progress = timeInCycle / scanDuration; // 0 to 1 during scan
     const lineY = scaledY + (progress * scaledHeight);
     
@@ -46,10 +65,40 @@ export const DefaultBoundingBox = ({ detection, canvasWidth, canvasHeight, video
   const scaledWidth = detection.box.width * scaleX;
   const scaledHeight = detection.box.height * scaleY;
   
-  // Green bounding box
-  ctx.strokeStyle = '#00FF00';
+  // Orange bounding box for calculating state
+  ctx.strokeStyle = '#FF8800';
   ctx.lineWidth = 5;
   ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+  
+  // Draw label underneath box
+  const labelX = scaledX;
+  const labelY = scaledY + scaledHeight + 20;
+  const labelWidth = scaledWidth;
+  const labelHeight = 80;
+  
+  // Draw translucent rounded background
+  ctx.fillStyle = 'rgba(255, 136, 0, 0.4)';
+  ctx.shadowColor = '#FF8800';
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.roundRect(labelX, labelY, labelWidth, labelHeight, 16);
+  ctx.fill();
+  
+  // Draw white text
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 40px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#FF8800';
+  ctx.shadowBlur = 3;
+  ctx.fillText('CALCULATING', labelX + labelWidth/2, labelY + labelHeight/2);
+  
+  // Reset shadow
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  
+  // Add scanning line animation
+  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, '#FF8800');
 };
 
 export const LabeledBoundingBox = ({ detection, canvasWidth, canvasHeight, videoWidth, videoHeight, ctx, color, text }: LabeledBoundingBoxProps) => {

@@ -34,6 +34,12 @@ export const FaceDetectionCanvas = ({
     window.dispatchEvent(event);
   }, [smileStatus]);
 
+  // Pass face detection status to parent
+  useEffect(() => {
+    const event = new CustomEvent('faceDetectionChange', { detail: detections });
+    window.dispatchEvent(event);
+  }, [detections]);
+
   useEffect(() => {
     if (!canvasRef.current || !videoRef.current) return;
 

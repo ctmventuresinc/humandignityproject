@@ -16,10 +16,12 @@ export default function Home() {
   const [currentTextIndex, setCurrentTextIndex] = useState<number>(0);
   const [smileStatus, setSmileStatus] = useState<string>('no_faces');
   const [isDuoMode, setIsDuoMode] = useState<boolean>(false); // Default to singleplayer
+  const [faceDetected, setFaceDetected] = useState<boolean>(false);
+  const [moggingState, setMoggingState] = useState<'calculating' | 'mogging' | 'mogged'>('calculating');
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Bounding box style selector
-  const boundingBoxStyle: BoundingBoxStyle = "mogging"; // 'default', 'mogged', 'mogging', or 'spotlight'
+  const boundingBoxStyle: BoundingBoxStyle = moggingState === 'calculating' ? 'default' : moggingState;
 
   // Detection mode based on toggle
   const detectionMode: DetectionMode = isDuoMode ? "duo" : "solo";
@@ -76,6 +78,40 @@ export default function Home() {
     };
   }, []);
 
+  // Listen for face detection changes
+  useEffect(() => {
+    const handleFaceDetectionChange = (event: any) => {
+      const hasDetections = event.detail && event.detail.length > 0;
+      if (hasDetections && !faceDetected) {
+        setFaceDetected(true);
+        // Store the start time for scanning line animation
+        window.localStorage.setItem('faceDetectionStarted', Date.now().toString());
+        window.localStorage.setItem('currentlyScanning', 'false');
+        // Set initial state to mogging when face detection starts
+        setMoggingState('mogging');
+      }
+    };
+    
+    window.addEventListener('faceDetectionChange', handleFaceDetectionChange);
+    
+    return () => {
+      window.removeEventListener('faceDetectionChange', handleFaceDetectionChange);
+    };
+  }, [faceDetected]);
+
+  // Listen for scan end events to switch state
+  useEffect(() => {
+    const handleScanEnd = () => {
+      setMoggingState(prev => prev === 'mogging' ? 'mogged' : 'mogging');
+    };
+    
+    window.addEventListener('scanEnd', handleScanEnd);
+    
+    return () => {
+      window.removeEventListener('scanEnd', handleScanEnd);
+    };
+  }, []);
+
   // Dynamically scale overlay text to fill screen width (uniform scaling)
   useEffect(() => {
     const updateScale = () => {
@@ -112,9 +148,9 @@ export default function Home() {
         <div style={{ transform: 'scale(0.85)' }}>
           <ChevronBadge label="LIVE" variant="cyan" size="small" />
         </div>
-        <div style={{ marginTop: '-20px' }}>
+        {/* <div style={{ marginTop: '-20px' }}>
           <ChevronBadge label="菫色いさん" variant="magenta" size="large" />
-        </div>
+        </div> */}
       </div>
       
       {/* Singleplayer/Multiplayer Mode Toggle */}
