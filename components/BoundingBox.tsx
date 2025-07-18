@@ -74,23 +74,37 @@ const drawScanningLine = (
     window.localStorage.setItem("currentlyScanning", "true");
     window.dispatchEvent(new CustomEvent("scanStart"));
     
-    // Generate fresh stats regardless of mogging state
-    const allObjective = [...objectiveGood, ...objectiveBad];
-    const allFunny = [...funnyGood, ...funnyBad];
+    // Determine if this cycle will be mogging or mogged
+    const willBeMogging = Math.random() > 0.5;
     
-    const randomObjective = allObjective[Math.floor(Math.random() * allObjective.length)];
-    const randomFunny1 = allFunny[Math.floor(Math.random() * allFunny.length)];
-    const randomFunny2 = allFunny[Math.floor(Math.random() * allFunny.length)];
+    let freshStats: string[];
     
-    const isPositive = Math.random() > 0.5;
-    
-    const freshStats = [
-      generateStat(randomObjective, isPositive, Math.floor(Math.random() * 1000)),
-      generateStat(randomFunny1, isPositive, Math.floor(Math.random() * 1000)),
-      generateStat(randomFunny2, isPositive, Math.floor(Math.random() * 1000))
-    ];
+    if (willBeMogging) {
+      // 2 from objectiveGood + 1 from funnyGood
+      const obj1 = objectiveGood[Math.floor(Math.random() * objectiveGood.length)];
+      const obj2 = objectiveGood[Math.floor(Math.random() * objectiveGood.length)];
+      const funny1 = funnyGood[Math.floor(Math.random() * funnyGood.length)];
+      
+      freshStats = [
+        generateStat(obj1, true, Math.floor(Math.random() * 1000)),
+        generateStat(obj2, true, Math.floor(Math.random() * 1000)),
+        generateStat(funny1, true, Math.floor(Math.random() * 1000))
+      ];
+    } else {
+      // 2 from funnyBad + 1 from objectiveBad
+      const funny1 = funnyBad[Math.floor(Math.random() * funnyBad.length)];
+      const funny2 = funnyBad[Math.floor(Math.random() * funnyBad.length)];
+      const obj1 = objectiveBad[Math.floor(Math.random() * objectiveBad.length)];
+      
+      freshStats = [
+        generateStat(funny1, false, Math.floor(Math.random() * 1000)),
+        generateStat(funny2, false, Math.floor(Math.random() * 1000)),
+        generateStat(obj1, false, Math.floor(Math.random() * 1000))
+      ];
+    }
     
     window.localStorage.setItem("currentCycleStats", JSON.stringify(freshStats));
+    window.localStorage.setItem("willBeMogging", willBeMogging.toString());
   }
 
   // Detect scan end
