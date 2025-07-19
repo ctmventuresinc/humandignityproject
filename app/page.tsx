@@ -159,9 +159,6 @@ export default function Home() {
       case 'result_display':
         timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.RESULT_DISPLAY_DURATION);
         break;
-      case 'waiting_for_input':
-        timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.LOOP_PAUSE_DURATION);
-        break;
     }
 
     return () => {

@@ -58,9 +58,6 @@ export const useTimelineState = () => {
           nextStep = 'result_display';
           break;
         case 'result_display':
-          nextStep = 'waiting_for_input';
-          break;
-        case 'waiting_for_input':
           nextStep = 'waiting';
           break;
         default:

@@ -5,8 +5,7 @@ export type TimelineStep =
   | 'countdown_1'
   | 'scanning'
   | 'calculating'
-  | 'result_display'
-  | 'waiting_for_input';
+  | 'result_display';
 
 export interface TimelineState {
   currentStep: TimelineStep;
