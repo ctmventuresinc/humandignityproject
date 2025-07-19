@@ -9,6 +9,7 @@ import ChevronBadge from "../components/ChevronBadge";
 import ModeToggle from "../components/ModeToggle";
 import MobileWarning from "../components/MobileWarning";
 import { useTimelineState } from "../hooks/useTimelineState";
+import { TIMELINE_TIMINGS, TIMELINE_CONFIG } from "../config/timeline";
 
 const textMessages = ["mogcam.com"];
 
@@ -135,7 +136,36 @@ export default function Home() {
     };
   }, [faceDetected, timelineState.currentStep, nextStep, resetTimeline]);
 
-  // Remove auto-advance - all steps now manual
+  // Auto-advance timeline for continuous loop
+  useEffect(() => {
+    let timer: number;
+    
+    // Set timing for each step using config values
+    switch (timelineState.currentStep) {
+      case 'countdown_3':
+      case 'countdown_2': 
+      case 'countdown_1':
+        timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.COUNTDOWN_DURATION);
+        break;
+      case 'scanning':
+        timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.SCANNING_DURATION);
+        break;
+      case 'calculating':
+        timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.CALCULATING_DURATION);
+        break;
+      case 'result_display':
+        timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.RESULT_DISPLAY_DURATION);
+        break;
+      case 'waiting_for_input':
+        timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.LOOP_PAUSE_DURATION);
+        break;
+      // 'waiting' has no timer - only advances when face detected
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [timelineState.currentStep, nextStep]);
 
 
 
@@ -251,51 +281,53 @@ export default function Home() {
             face2State={"calculating"}
           />
 
-          {/* Timeline controls */}
-          <div style={{
-            position: "absolute",
-            top: "10px",
-            left: "10px",
-            color: "white",
-            background: "rgba(0,0,0,0.7)",
-            padding: "15px",
-            borderRadius: "8px",
-            fontSize: "14px",
-            zIndex: 15,
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px"
-          }}>
-            <div>Step: <strong>{timelineState.currentStep}</strong></div>
-            <button 
-              onClick={handleNextStep}
-              style={{
-                background: "#20C65F",
-                color: "white",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontWeight: "bold"
-              }}
-            >
-              NEXT STEP
-            </button>
-            <button 
-              onClick={resetTimeline}
-              style={{
-                background: "#FF073A",
-                color: "white", 
-                border: "none",
-                padding: "6px 12px",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "12px"
-              }}
-            >
-              RESET
-            </button>
-          </div>
+          {/* Timeline controls - only show in debug mode */}
+          {TIMELINE_CONFIG.DEBUG_MODE && (
+            <div style={{
+              position: "absolute",
+              top: "10px",
+              left: "10px",
+              color: "white",
+              background: "rgba(0,0,0,0.7)",
+              padding: "15px",
+              borderRadius: "8px",
+              fontSize: "14px",
+              zIndex: 15,
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px"
+            }}>
+              <div>Step: <strong>{timelineState.currentStep}</strong></div>
+              <button 
+                onClick={handleNextStep}
+                style={{
+                  background: "#20C65F",
+                  color: "white",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontWeight: "bold"
+                }}
+              >
+                NEXT STEP
+              </button>
+              <button 
+                onClick={resetTimeline}
+                style={{
+                  background: "#FF073A",
+                  color: "white", 
+                  border: "none",
+                  padding: "6px 12px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "12px"
+                }}
+              >
+                RESET
+              </button>
+            </div>
+          )}
         </div>
       )}
 

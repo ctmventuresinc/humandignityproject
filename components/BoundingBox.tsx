@@ -1,5 +1,6 @@
 import { BoundingBoxProps } from "../types/face-detection";
 import { TimelineStep } from "../types/timeline";
+import { TIMELINE_TIMINGS } from "../config/timeline";
 
 interface LabeledBoundingBoxProps extends BoundingBoxProps {
   color: string;
@@ -123,8 +124,7 @@ const drawTimelineContent = (
     
     const startTime = parseInt(scanStartTime || now.toString());
     const elapsed = now - startTime;
-    const scanDuration = 3000; // 3 seconds for full scan
-    const scanProgress = Math.min(elapsed / scanDuration, 1); // 0 to 1
+    const scanProgress = Math.min(elapsed / TIMELINE_TIMINGS.SCAN_LINE_DURATION, 1); // 0 to 1
     
     const lineY = scaledY + scanProgress * scaledHeight;
 
