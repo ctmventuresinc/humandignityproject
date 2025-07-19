@@ -142,6 +142,9 @@ export default function Home() {
     
     // Set timing for each step using config values
     switch (timelineState.currentStep) {
+      case 'waiting':
+        timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.WAITING_DURATION);
+        break;
       case 'countdown_3':
       case 'countdown_2': 
       case 'countdown_1':
@@ -159,7 +162,6 @@ export default function Home() {
       case 'waiting_for_input':
         timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.LOOP_PAUSE_DURATION);
         break;
-      // 'waiting' has no timer - only advances when face detected
     }
 
     return () => {

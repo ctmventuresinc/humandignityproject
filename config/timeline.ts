@@ -15,6 +15,9 @@ export const TIMELINE_TIMINGS = {
   // Waiting for input step (pause before loop restart)
   LOOP_PAUSE_DURATION: 2000, // 2 seconds pause before restarting
   
+  // Waiting step (auto restart)
+  WAITING_DURATION: 1000, // 1 second before auto-restarting loop
+  
   // Scan line animation
   SCAN_LINE_DURATION: 3000, // Should match SCANNING_DURATION for smooth animation
 } as const;
