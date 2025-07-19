@@ -8,6 +8,7 @@ import { BoundingBoxStyle, DetectionMode } from "../types/face-detection";
 import ChevronBadge from "../components/ChevronBadge";
 import ModeToggle from "../components/ModeToggle";
 import MobileWarning from "../components/MobileWarning";
+import { useTimelineState } from "../hooks/useTimelineState";
 
 const textMessages = ["mogcam.com"];
 
@@ -20,41 +21,26 @@ export default function Home() {
   const [smileStatus, setSmileStatus] = useState<string>("no_faces");
   const [isDuoMode, setIsDuoMode] = useState<boolean>(false); // Default to singleplayer
   const [faceDetected, setFaceDetected] = useState<boolean>(false);
-  const [moggingState, setMoggingState] = useState<
-    "calculating" | "mogging" | "mogged"
-  >("calculating");
-  const [face1State, setFace1State] = useState<
-    "calculating" | "mogging" | "mogged"
-  >("calculating");
-  const [face2State, setFace2State] = useState<
-    "calculating" | "mogging" | "mogged"
-  >("calculating");
-  const [showOrangeFlash, setShowOrangeFlash] = useState<boolean>(false);
-  const [showMoggedOverlay, setShowMoggedOverlay] = useState<boolean>(false);
-  const [showGreenFlash, setShowGreenFlash] = useState<boolean>(false);
-  const [showMoggingOverlay, setShowMoggingOverlay] = useState<boolean>(false);
   const [currentFaceCount, setCurrentFaceCount] = useState<number>(0);
-  const overlayRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  
+  // Timeline state management
+  const { timelineState, nextStep, resetTimeline } = useTimelineState();
 
-  // Keep track of previous state and any active timers so we can cancel them
-  const prevMoggingStateRef = useRef<"calculating" | "mogging" | "mogged">(
-    moggingState
-  );
-  const effectTimersRef = useRef<number[]>([]);
-
-  // Helper to clear all scheduled timers in our effect sequence
-  const clearEffectTimers = () => {
-    effectTimersRef.current.forEach((id) => clearTimeout(id));
-    effectTimersRef.current = [];
-  };
-
-  // Bounding box style selector
-  const boundingBoxStyle: BoundingBoxStyle =
-    moggingState === "calculating" ? "default" : moggingState;
+  // Bounding box style selector based on timeline
+  const boundingBoxStyle: BoundingBoxStyle = 
+    timelineState.currentStep === 'waiting' || timelineState.currentStep.startsWith('countdown_') || timelineState.currentStep === 'scanning' || timelineState.currentStep === 'calculating'
+      ? "default" 
+      : timelineState.willBeMogging ? "mogging" : "mogged";
 
   // Detection mode based on toggle
   const detectionMode: DetectionMode = isDuoMode ? "duo" : "solo";
+
+  // Button handler for manual progression
+  const handleNextStep = () => {
+    nextStep();
+  };
 
   // Check if device is mobile
   useEffect(() => {
@@ -129,13 +115,13 @@ export default function Home() {
       const hasDetections = faceCount > 0;
       if (hasDetections && !faceDetected) {
         setFaceDetected(true);
-
-        // Start scanning line animation immediately when face detected
-        window.localStorage.setItem(
-          "faceDetectionStarted",
-          Date.now().toString()
-        );
-        window.localStorage.setItem("currentlyScanning", "false");
+        // Start timeline when face first detected
+        if (timelineState.currentStep === 'waiting') {
+          nextStep(); // Move to countdown_3
+        }
+      } else if (!hasDetections && faceDetected) {
+        setFaceDetected(false);
+        resetTimeline(); // Reset to waiting when no faces
       }
     };
 
@@ -147,136 +133,11 @@ export default function Home() {
         handleFaceDetectionChange
       );
     };
-  }, [faceDetected]);
+  }, [faceDetected, timelineState.currentStep, nextStep, resetTimeline]);
 
-  // Listen for scan end events to switch state
-  useEffect(() => {
-    const handleScanEnd = () => {
-      // Only change states if faces are actually detected
-      if (currentFaceCount === 0) return;
-      
-      if (isDuoMode) {
-        // Only proceed if we have 2 faces in duo mode
-        if (currentFaceCount < 2) return;
-        // Handle duo mode - only one face can be mogging, the other must be mogged
-        // 50% chance determines which face gets to be mogging
-        const face1GetsMogging = Math.random() < 0.5;
-        
-        setFace1State((prev) => {
-          if (prev === "calculating") {
-            return "mogged"; // Always start with mogged after calculating
-          } else {
-            return face1GetsMogging ? "mogging" : "mogged";
-          }
-        });
+  // Remove auto-advance - all steps now manual
 
-        setFace2State((prev) => {
-          if (prev === "calculating") {
-            return "mogging"; // Start with mogging for face 2
-          } else {
-            return face1GetsMogging ? "mogged" : "mogging";
-          }
-        });
-      } else {
-        // Handle single player mode - only proceed if we have exactly 1 face
-        if (currentFaceCount !== 1) return;
-        
-        setMoggingState((prev) => {
-          let nextState: "calculating" | "mogging" | "mogged";
 
-          if (prev === "calculating") {
-            nextState = "mogged"; // Always start with mogged after calculating
-          } else {
-            // Randomly choose between mogging and mogged. Same-state transitions are allowed.
-            nextState = Math.random() < 0.5 ? "mogging" : "mogged";
-          }
-
-          return nextState;
-        });
-      }
-    };
-
-    window.addEventListener("scanEnd", handleScanEnd);
-
-    return () => {
-      window.removeEventListener("scanEnd", handleScanEnd);
-    };
-  }, [isDuoMode, currentFaceCount]);
-
-  // ------------------------------------------------------------
-  // Effect handler: run flashes/graphic when moggingState changes
-  // ------------------------------------------------------------
-  useEffect(() => {
-    const previous = prevMoggingStateRef.current;
-
-    // Only react if the state actually changed
-    if (moggingState === previous) return;
-
-    // Update previous state reference for next run
-    prevMoggingStateRef.current = moggingState;
-
-    // Clear any previous timers and hide all overlays/flash states
-    clearEffectTimers();
-    setShowOrangeFlash(false);
-    setShowGreenFlash(false);
-    setShowMoggedOverlay(false);
-    setShowMoggingOverlay(false);
-
-    const timers: number[] = [];
-
-    if (moggingState === "mogged") {
-      // ORANGE flash + red overlay
-      setShowOrangeFlash(true);
-      timers.push(window.setTimeout(() => setShowOrangeFlash(false), 100));
-
-      timers.push(
-        window.setTimeout(() => {
-          setShowOrangeFlash(true);
-          timers.push(window.setTimeout(() => setShowOrangeFlash(false), 100));
-        }, 150)
-      );
-
-      timers.push(
-        window.setTimeout(() => {
-          setShowMoggedOverlay(true);
-          timers.push(
-            window.setTimeout(() => setShowMoggedOverlay(false), 1500)
-          );
-        }, 400)
-      );
-    } else if (moggingState === "mogging") {
-      // GREEN flash + green overlay
-      setShowGreenFlash(true);
-      timers.push(window.setTimeout(() => setShowGreenFlash(false), 100));
-
-      timers.push(
-        window.setTimeout(() => {
-          setShowGreenFlash(true);
-          timers.push(window.setTimeout(() => setShowGreenFlash(false), 100));
-        }, 150)
-      );
-
-      timers.push(
-        window.setTimeout(() => {
-          setShowMoggingOverlay(true);
-          timers.push(
-            window.setTimeout(() => setShowMoggingOverlay(false), 1500)
-          );
-        }, 400)
-      );
-    }
-
-    effectTimersRef.current = timers;
-
-    // Cleanup when effect re-runs or component unmounts
-    return () => {
-      clearEffectTimers();
-      setShowOrangeFlash(false);
-      setShowGreenFlash(false);
-      setShowMoggedOverlay(false);
-      setShowMoggingOverlay(false);
-    };
-  }, [moggingState]);
 
   // Dynamically scale overlay text to fill screen width (uniform scaling)
   useEffect(() => {
@@ -386,91 +247,55 @@ export default function Home() {
             canvasRef={canvasRef}
             style={boundingBoxStyle}
             mode={detectionMode}
-            face1State={face1State}
-            face2State={face2State}
+            face1State={"calculating"}
+            face2State={"calculating"}
           />
 
-          {/* Orange flash overlay */}
-          {showOrangeFlash && (
-            <div
+          {/* Timeline controls */}
+          <div style={{
+            position: "absolute",
+            top: "10px",
+            left: "10px",
+            color: "white",
+            background: "rgba(0,0,0,0.7)",
+            padding: "15px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            zIndex: 15,
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px"
+          }}>
+            <div>Step: <strong>{timelineState.currentStep}</strong></div>
+            <button 
+              onClick={handleNextStep}
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "rgba(254, 107, 0, 0.6)",
-                pointerEvents: "none",
-                zIndex: 10,
-              }}
-            />
-          )}
-
-          {/* Green flash overlay */}
-          {showGreenFlash && (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "rgba(32, 201, 95, 0.6)", // Green
-                pointerEvents: "none",
-                zIndex: 10,
-              }}
-            />
-          )}
-
-          {/* Mogged overlay */}
-          {showMoggedOverlay && (
-          <div
-          style={{
-          position: "absolute",
-          top: "50%",
-          left: "calc(50% - 100px)",
-          transform: "translate(-50%, -50%) rotate(-15deg) scale(1.5)",
-                zIndex: 20,
-                pointerEvents: "none",
-                animation: "moggedFlash 1.2s ease-in-out forwards",
+                background: "#20C65F",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontWeight: "bold"
               }}
             >
-              <img
-                src="/mogged.png"
-                alt="MOGGED"
-                style={{
-                  width: "350px",
-                  height: "auto",
-                  filter: "drop-shadow(0 0 25px #FF073A)",
-                }}
-              />
-            </div>
-          )}
-
-          {/* Mogging overlay */}
-          {showMoggingOverlay && (
-          <div
-          style={{
-          position: "absolute",
-          top: "50%",
-          left: "calc(50% - 100px)",
-          transform: "translate(-50%, -50%) rotate(-15deg) scale(1.5)",
-                zIndex: 20,
-                pointerEvents: "none",
-                animation: "moggedFlash 1.2s ease-in-out forwards",
+              NEXT STEP
+            </button>
+            <button 
+              onClick={resetTimeline}
+              style={{
+                background: "#FF073A",
+                color: "white", 
+                border: "none",
+                padding: "6px 12px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "12px"
               }}
             >
-              <img
-                src="/mogging.png"
-                alt="MOGGING"
-                style={{
-                  width: "350px",
-                  height: "auto",
-                  filter: "drop-shadow(0 0 25px #20C95F)",
-                }}
-              />
-            </div>
-          )}
+              RESET
+            </button>
+          </div>
         </div>
       )}
 

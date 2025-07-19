@@ -1,4 +1,5 @@
 import { BoundingBoxProps } from "../types/face-detection";
+import { TimelineStep } from "../types/timeline";
 
 interface LabeledBoundingBoxProps extends BoundingBoxProps {
   color: string;
@@ -40,78 +41,25 @@ const generateStat = (category: string, isPositive: boolean, seed: number) => {
   return `${sign}${randomNum} ${category}`;
 };
 
-// Helper function to draw scanning line animation
-const drawScanningLine = (
+// Helper function to draw timeline-based content
+const drawTimelineContent = (
   ctx: CanvasRenderingContext2D,
   scaledX: number,
   scaledY: number,
   scaledWidth: number,
   scaledHeight: number,
-  color: string
+  color: string,
+  timelineStep: TimelineStep
 ) => {
-  // Check if face detection has started
-  const faceDetectionStarted = window.localStorage.getItem(
-    "faceDetectionStarted"
-  );
-  if (!faceDetectionStarted) return;
+  // Get timeline state from localStorage
+  const timelineState = window.localStorage.getItem("timelineState");
+  if (!timelineState) return;
 
-  const startTime = parseInt(faceDetectionStarted);
-  const now = Date.now();
-  const countdownDuration = 3000; // 3 seconds countdown
-  const scanDuration = 1000; // 1 second scan
-  const waitDuration = 3000; // 3 seconds wait
-  const totalCycle = countdownDuration + scanDuration + waitDuration; // 7 seconds total
-
-  const timeInCycle = (now - startTime) % totalCycle;
+  const { currentStep } = JSON.parse(timelineState);
   
-  const wasScanning = window.localStorage.getItem("currentlyScanning") === "true";
-  const isCountdown = timeInCycle <= countdownDuration;
-  const isScanning = timeInCycle > countdownDuration && timeInCycle <= countdownDuration + scanDuration;
-  const isResult = timeInCycle > countdownDuration + scanDuration;
-
-  // Detect scan start - generate fresh stats
-  if (isScanning && !wasScanning) {
-    window.localStorage.setItem("currentlyScanning", "true");
-    window.dispatchEvent(new CustomEvent("scanStart"));
-    
-    // Determine if this cycle will be mogging or mogged
-    const willBeMogging = Math.random() > 0.5;
-    
-    let freshStats: string[];
-    
-    if (willBeMogging) {
-      // 2 from objectiveGood + 1 from funnyGood
-      const obj1 = objectiveGood[Math.floor(Math.random() * objectiveGood.length)];
-      const obj2 = objectiveGood[Math.floor(Math.random() * objectiveGood.length)];
-      const funny1 = funnyGood[Math.floor(Math.random() * funnyGood.length)];
-      
-      freshStats = [
-        generateStat(obj1, true, Math.floor(Math.random() * 1000)),
-        generateStat(obj2, true, Math.floor(Math.random() * 1000)),
-        generateStat(funny1, true, Math.floor(Math.random() * 1000))
-      ];
-    } else {
-      // 2 from funnyBad + 1 from objectiveBad
-      const funny1 = funnyBad[Math.floor(Math.random() * funnyBad.length)];
-      const funny2 = funnyBad[Math.floor(Math.random() * funnyBad.length)];
-      const obj1 = objectiveBad[Math.floor(Math.random() * objectiveBad.length)];
-      
-      freshStats = [
-        generateStat(funny1, false, Math.floor(Math.random() * 1000)),
-        generateStat(funny2, false, Math.floor(Math.random() * 1000)),
-        generateStat(obj1, false, Math.floor(Math.random() * 1000))
-      ];
-    }
-    
-    window.localStorage.setItem("currentCycleStats", JSON.stringify(freshStats));
-    window.localStorage.setItem("willBeMogging", willBeMogging.toString());
-  }
-
-  // Detect scan end
-  if (!isScanning && wasScanning) {
-    window.localStorage.setItem("currentlyScanning", "false");
-    window.dispatchEvent(new CustomEvent("scanEnd"));
-  }
+  const isCountdown = currentStep.startsWith('countdown_');
+  const isScanning = currentStep === 'scanning';
+  const isResult = currentStep === 'result_display';
 
   // Get current stats if they exist
   const storedStats = window.localStorage.getItem("currentCycleStats");
@@ -119,7 +67,8 @@ const drawScanningLine = (
 
   // Draw countdown text during countdown period
   if (isCountdown) {
-    const countdownNumber = Math.ceil((countdownDuration - timeInCycle) / 1000); // 3, 2, 1
+    // Extract countdown number from step name (countdown_3 -> 3)
+    const countdownNumber = parseInt(currentStep.split('_')[1]);
 
     // Only show countdown if it's 3, 2, or 1
     if (countdownNumber >= 1 && countdownNumber <= 3) {
@@ -161,7 +110,22 @@ const drawScanningLine = (
 
   // Draw scanning line during scan period
   if (isScanning) {
-    const scanProgress = (timeInCycle - countdownDuration) / scanDuration; // 0 to 1 during scan
+    // Create animated scan line from top to bottom over time
+    const scanStartTime = window.localStorage.getItem('scanStartTime');
+    const now = Date.now();
+    
+    if (!scanStartTime) {
+      // First time scanning - set start time and pick random phrase
+      window.localStorage.setItem('scanStartTime', now.toString());
+      const phraseIndex = Math.floor(Math.random() * loadingPhrases.length);
+      window.localStorage.setItem('currentScanPhrase', loadingPhrases[phraseIndex]);
+    }
+    
+    const startTime = parseInt(scanStartTime || now.toString());
+    const elapsed = now - startTime;
+    const scanDuration = 3000; // 3 seconds for full scan
+    const scanProgress = Math.min(elapsed / scanDuration, 1); // 0 to 1
+    
     const lineY = scaledY + scanProgress * scaledHeight;
 
     // Draw white scanning line with opacity and glow
@@ -179,11 +143,8 @@ const drawScanningLine = (
     ctx.shadowColor = "transparent";
     ctx.shadowBlur = 0;
 
-    // Draw loading phrase below the bounding box during scanning
-    // Use the current scan cycle number to get a different phrase each cycle
-    const scanCycleNumber = Math.floor((now - startTime) / totalCycle);
-    const phraseIndex = (startTime + scanCycleNumber * 1337) % loadingPhrases.length;
-    const loadingPhrase = loadingPhrases[phraseIndex];
+    // Draw the same loading phrase throughout scanning
+    const loadingPhrase = window.localStorage.getItem('currentScanPhrase') || loadingPhrases[0];
     
     const centerX = scaledX + scaledWidth / 2;
     
@@ -192,6 +153,12 @@ const drawScanningLine = (
     ctx.textBaseline = "top";
     ctx.fillStyle = "#FFFFFF";
     ctx.fillText(loadingPhrase, centerX, scaledY + scaledHeight + 120);
+  } else {
+    // Clear scan timing when not scanning
+    if (window.localStorage.getItem('scanStartTime')) {
+      window.localStorage.removeItem('scanStartTime');
+      window.localStorage.removeItem('currentScanPhrase');
+    }
   }
   
   // During result period, show stats to the right of bounding box
@@ -271,8 +238,8 @@ export const DefaultBoundingBox = ({
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
 
-  // Add scanning line animation
-  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#00FFFF");
+  // Add timeline content
+  drawTimelineContent(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#00FFFF", "calculating");
 };
 
 export const LabeledBoundingBox = ({
@@ -375,8 +342,8 @@ export const MoggedBoundingBox = ({
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
 
-  // Add scanning line animation and countdown
-  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#FF073A");
+  // Add timeline content and countdown
+  drawTimelineContent(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#FF073A", "result_display");
 };
 
 export const MoggingBoundingBox = ({
@@ -434,8 +401,8 @@ export const MoggingBoundingBox = ({
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
 
-  // Add scanning line animation and countdown
-  drawScanningLine(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#03FF07");
+  // Add timeline content and countdown
+  drawTimelineContent(ctx, scaledX, scaledY, scaledWidth, scaledHeight, "#03FF07", "result_display");
 };
 
 export const WaitingBoundingBox = ({
