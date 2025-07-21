@@ -29,7 +29,7 @@ const generateStat = (category: string, isPositive: boolean, seed: number) => {
 
 export const useTimelineState = () => {
   const [timelineState, setTimelineState] = useState<TimelineState>({
-    currentStep: 'waiting',
+    currentStep: 'countdown_3',
     cycleStats: [],
     willBeMogging: false
   });
@@ -39,9 +39,6 @@ export const useTimelineState = () => {
       let nextStep: TimelineStep;
       
       switch (prev.currentStep) {
-        case 'waiting':
-          nextStep = 'countdown_3';
-          break;
         case 'countdown_3':
           nextStep = 'countdown_2';
           break;
@@ -52,23 +49,20 @@ export const useTimelineState = () => {
           nextStep = 'scanning';
           break;
         case 'scanning':
-          nextStep = 'calculating';
-          break;
-        case 'calculating':
           nextStep = 'result_display';
           break;
         case 'result_display':
-          nextStep = 'waiting';
+          nextStep = 'countdown_3';
           break;
         default:
-          nextStep = 'waiting';
+          nextStep = 'countdown_3';
       }
 
-      // Generate stats when moving to calculating step
+      // Generate stats when moving to scanning step
       let newStats = prev.cycleStats;
       let willBeMogging = prev.willBeMogging;
       
-      if (nextStep === 'calculating') {
+      if (nextStep === 'scanning') {
         willBeMogging = Math.random() > 0.5;
         
         if (willBeMogging) {
@@ -112,7 +106,7 @@ export const useTimelineState = () => {
 
   const resetTimeline = useCallback(() => {
     const initialState = {
-      currentStep: 'waiting' as TimelineStep,
+      currentStep: 'countdown_3' as TimelineStep,
       cycleStats: [],
       willBeMogging: false
     };

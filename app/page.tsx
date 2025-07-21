@@ -31,7 +31,7 @@ export default function Home() {
 
   // Bounding box style selector based on timeline
   const boundingBoxStyle: BoundingBoxStyle = 
-    timelineState.currentStep === 'waiting' || timelineState.currentStep.startsWith('countdown_') || timelineState.currentStep === 'scanning' || timelineState.currentStep === 'calculating'
+    timelineState.currentStep.startsWith('countdown_') || timelineState.currentStep === 'scanning'
       ? "default" 
       : timelineState.willBeMogging ? "mogging" : "mogged";
 
@@ -142,9 +142,6 @@ export default function Home() {
     
     // Set timing for each step using config values
     switch (timelineState.currentStep) {
-      case 'waiting':
-        timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.WAITING_DURATION);
-        break;
       case 'countdown_3':
       case 'countdown_2': 
       case 'countdown_1':
@@ -152,9 +149,6 @@ export default function Home() {
         break;
       case 'scanning':
         timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.SCANNING_DURATION);
-        break;
-      case 'calculating':
-        timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.CALCULATING_DURATION);
         break;
       case 'result_display':
         timer = window.setTimeout(nextStep, TIMELINE_TIMINGS.RESULT_DISPLAY_DURATION);
